@@ -15,9 +15,11 @@ import { GAMES, getGame } from '../games/index.js';
 import { audio } from './audio.js';
 import { Background } from './background.js';
 import { Confetti } from './confetti.js';
+import { EdgeScroller } from './edge-scroll.js';
 import { shuffle, pick } from './game-api.js';
 
 const STORAGE_KEY = 'nate-games:theme';
+const SCROLL_KEY = 'nate-games:autoscroll';
 
 class App {
   constructor() {
@@ -30,14 +32,20 @@ class App {
     this.themeBar = document.getElementById('theme-bar');
     this.grid = document.getElementById('game-grid');
     this.muteBtn = document.getElementById('mute-btn');
+    this.scrollBtn = document.getElementById('scroll-btn');
+    this.scroller = new EdgeScroller(this.grid);
     this.current = null; // active game module
     this.theme = null;
 
     this._initTheme();
+    this._initAutoScroll();
     this._renderThemeBar();
     this._renderGrid();
     this._wireChrome();
     this._wireAudioUnlock();
+    // Keep the "more below" fade in sync with scroll position.
+    this.grid.addEventListener('scroll', () => this._updateScrollFade(), { passive: true });
+    window.addEventListener('resize', () => this._updateScrollFade());
     window.addEventListener('hashchange', () => this._syncFromHash());
     this._syncFromHash();
   }
@@ -96,6 +104,31 @@ class App {
     }
   }
 
+  // ---- Auto-scroll (mouse-movement scrolling, toggle, default ON) ----------
+  _initAutoScroll() {
+    const saved = localStorage.getItem(SCROLL_KEY);
+    // Default ON, but respect a system "reduce motion" preference on first run.
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const on = saved == null ? !reduce : saved === '1';
+    this._setAutoScroll(on, false);
+  }
+
+  _setAutoScroll(on, persist = true) {
+    this.scroller.setEnabled(on);
+    this.scrollBtn.setAttribute('aria-pressed', String(on));
+    this.scrollBtn.classList.toggle('is-off', !on);
+    this.scrollBtn.title = on ? 'Mouse-scroll: on' : 'Mouse-scroll: off';
+    if (persist) localStorage.setItem(SCROLL_KEY, on ? '1' : '0');
+  }
+
+  // Show the soft bottom fade only while there's more list below the fold.
+  _updateScrollFade() {
+    const el = this.grid;
+    const atEnd = el.scrollHeight <= el.clientHeight + 1
+      || el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+    el.classList.toggle('at-end', atEnd);
+  }
+
   // ---- Home grid -----------------------------------------------------------
   _renderGrid() {
     this.grid.innerHTML = '';
@@ -131,11 +164,14 @@ class App {
     this.play.hidden = true;
     this.home.hidden = false;
     if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    this._updateScrollFade();
+    this.scroller.start(); // mouse-movement scrolling only runs on the home grid
   }
 
   _openGame(game) {
     if (this.current?.id === game.id) return;
     this._closeGame();
+    this.scroller.stop();
     this.home.hidden = true;
     this.play.hidden = false;
     this.gameTitle.textContent = `${game.emoji} ${game.title}`;
@@ -177,6 +213,12 @@ class App {
       this.muteBtn.setAttribute('aria-pressed', String(muted));
       this.muteBtn.textContent = muted ? '🔇' : '🔊';
       audio.setMuted(muted);
+    });
+    this.scrollBtn.addEventListener('click', () => {
+      audio.unlock();
+      audio.pop();
+      const on = this.scrollBtn.getAttribute('aria-pressed') !== 'true';
+      this._setAutoScroll(on);
     });
   }
 

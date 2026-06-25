@@ -51,11 +51,16 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 [hidden] { display: none !important; }
 
 /* ---- Top-right icon controls ------------------------------------------- */
-.icon-btn {
+.controls {
   position: fixed;
   top: 14px;
   right: 14px;
   z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.icon-btn {
   width: 58px;
   height: 58px;
   border: none;
@@ -64,10 +69,12 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
   box-shadow: var(--shadow);
   font-size: 26px;
   cursor: pointer;
-  transition: transform 0.12s ease;
+  transition: transform 0.12s ease, opacity 0.12s ease;
 }
 .icon-btn:hover { transform: scale(1.1); }
 .icon-btn:active { transform: scale(0.94); }
+/* "Off" toggle state: dim the icon so a grown-up can see it's disabled. */
+.icon-btn.is-off { opacity: 0.4; }
 
 /* ---- Home screen -------------------------------------------------------- */
 .home-header { text-align: center; padding: 28px 16px 8px; }
@@ -127,7 +134,26 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
   margin: 0 auto;
   width: 100%;
   overflow-y: auto;
+  /* Friendly fat scrollbar (still usable, but the toggle auto-scroll is the
+     toddler path). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+  /* Soft "more below" fade — removed via .at-end when fully scrolled. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 42px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 42px), transparent);
 }
+.game-grid.at-end {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.game-grid::-webkit-scrollbar { width: 12px; }
+.game-grid::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+.game-grid::-webkit-scrollbar-track { background: transparent; }
 .game-card {
   display: flex;
   flex-direction: column;
