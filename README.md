@@ -20,6 +20,7 @@ server — and is hosted free on **GitHub Pages**.
   | Game | What it teaches |
   |------|-----------------|
   | 🐮 **Animal Friends** | Listen and click the right animal — vocabulary + listening |
+  | 🙈 **Peekaboo!** | Open the curtains to reveal a hidden friend — cause & effect, for the youngest |
   | 🫧 **Bubble Pop** | Pop floating bubbles (with combos) — pure mouse-control practice |
   | 🎈 **Balloon Bash** | Burst balloons for points — aiming + the joy of a hot streak |
   | ✏️ **Trace Trails** | Follow a path with the pointer — fine mouse control |

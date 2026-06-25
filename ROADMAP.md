@@ -27,7 +27,7 @@ animated background · confetti · combo/juice system · global mute.
 - [ ] 🟡 **Big & Small / Opposites** — tap the big one vs the small one; hot/cold, up/down. Early comparison concepts.
 - [ ] 🟡 **Dot-to-Dot** — click numbered dots in order to reveal a picture. Combines counting + the mouse path.
 - [ ] 🟡 **Simple Puzzle** — drag 2–4 big pieces into place to complete a picture.
-- [ ] 🟡 **Peekaboo / Cause & Effect** — tap doors/boxes to reveal a surprise animal + sound. Great for the very youngest.
+- [x] 🟡 **Peekaboo / Cause & Effect** — open curtained windows to reveal a hidden, show-inspired friend + cheer. Great for the very youngest. ✅ shipped (`src/games/peekaboo/`)
 - [ ] 🟡 **Weather & Seasons** — tap the sun/rain/snow; dress the character for the weather.
 - [ ] 🟡 **Body Parts** — "Where is the nose?" on a friendly face. Vocabulary + pointing.
 - [ ] 🔴 **Simple Maze** — guide a character to the goal by moving the mouse. Advanced mouse control.
