@@ -11,12 +11,13 @@
  */
 import animals from './animals/game.js';
 import bubbles from './bubbles/game.js';
+import trace from './trace/game.js';
 import match from './match/game.js';
 import soundboard from './soundboard/game.js';
 
 import { assertValidGame } from '../core/game-api.js';
 
-export const GAMES = [animals, bubbles, match, soundboard].map(assertValidGame);
+export const GAMES = [animals, bubbles, trace, match, soundboard].map(assertValidGame);
 
 export function getGame(id) {
   return GAMES.find((g) => g.id === id) || null;
