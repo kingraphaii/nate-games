@@ -128,6 +128,35 @@ class AudioEngine {
     this.tone(150 * pitch, { duration: 0.1, type: 'sine', volume: volume * 0.5, glide: 0.5 });
   }
 
+  /**
+   * Quick airy "swoosh" — a blade slicing through fruit. Band-passed noise
+   * whose center frequency sweeps upward, plus a soft juicy splat underneath.
+   */
+  swoosh({ pitch = 1, volume = 0.4 } = {}) {
+    if (!this.ctx || this.muted) return;
+    const t0 = this.ctx.currentTime;
+    const dur = 0.18;
+    const len = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
+    const buffer = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1; // white noise
+    const src = this.ctx.createBufferSource();
+    src.buffer = buffer;
+    const band = this.ctx.createBiquadFilter();
+    band.type = 'bandpass';
+    band.Q.value = 1.2;
+    band.frequency.setValueAtTime(700 * pitch, t0);
+    band.frequency.exponentialRampToValueAtTime(2600 * pitch, t0 + dur); // rising whoosh
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(volume, t0 + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(band).connect(gain).connect(this.master);
+    src.start(t0);
+    // A soft low "splat" gives the slice some juice.
+    this.tone(240 * pitch, { duration: 0.09, type: 'sine', volume: volume * 0.5, glide: 0.6 });
+  }
+
   _pickVoice() {
     if (this.voice || !('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();
