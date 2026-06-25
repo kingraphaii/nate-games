@@ -98,6 +98,36 @@ class AudioEngine {
     this.tone(520 * pitch, { duration: 0.12, type: 'sine', volume: 0.45, glide: 1.8 });
   }
 
+  /**
+   * Sharp noise "bang" — a balloon burst. A short band-passed white-noise
+   * transient plus a low thump for body. Bigger balloons -> lower, fatter bang.
+   */
+  burst({ pitch = 1, volume = 0.5 } = {}) {
+    if (!this.ctx || this.muted) return;
+    const t0 = this.ctx.currentTime;
+    const dur = 0.14;
+    const len = Math.max(1, Math.floor(this.ctx.sampleRate * dur));
+    const buffer = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      // White noise with a fast quadratic decay -> a crisp snap.
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+    }
+    const src = this.ctx.createBufferSource();
+    src.buffer = buffer;
+    const band = this.ctx.createBiquadFilter();
+    band.type = 'bandpass';
+    band.frequency.value = 1100 * pitch;
+    band.Q.value = 0.7;
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(volume, t0);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(band).connect(gain).connect(this.master);
+    src.start(t0);
+    // A short low thump gives the bang some weight.
+    this.tone(150 * pitch, { duration: 0.1, type: 'sine', volume: volume * 0.5, glide: 0.5 });
+  }
+
   _pickVoice() {
     if (this.voice || !('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();

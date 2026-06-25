@@ -20,8 +20,12 @@ server — and is hosted free on **GitHub Pages**.
   | Game | What it teaches |
   |------|-----------------|
   | 🐮 **Animal Friends** | Listen and click the right animal — vocabulary + listening |
-  | 🫧 **Bubble Pop** | Pop floating bubbles — pure mouse-control practice |
+  | 🫧 **Bubble Pop** | Pop floating bubbles (with combos) — pure mouse-control practice |
+  | 🎈 **Balloon Bash** | Burst balloons for points — aiming + the joy of a hot streak |
+  | ✏️ **Trace Trails** | Follow a path with the pointer — fine mouse control |
   | 🔶 **Match It** | Find the matching colour & shape — shapes, colours, aiming |
+  | 🔢 **Count With Me** | Tap and count 1–5 — counting + one-to-one correspondence |
+  | 🔤 **Letter Sounds** | Find a letter, learn its phonics sound — alphabet + reading |
   | 🎹 **Music Maker** | Tap buttons to play notes — cause-and-effect + music |
 - **All sound is synthesized** (Web Audio) or spoken (browser speech synthesis), so there
   are **no audio files** to download or license.
@@ -54,21 +58,27 @@ nate-games/
 │   │   ├── game-api.js     # the contract every game implements (+ helpers)
 │   │   ├── audio.js        # synthesized tones + speech (no audio files)
 │   │   ├── background.js   # animated themed home background (canvas)
-│   │   └── confetti.js     # celebratory particle bursts
+│   │   ├── confetti.js     # celebratory particle bursts
+│   │   └── juice.js        # shared "game feel": combos, multipliers, floating score
 │   ├── themes/             # one file per theme + index.js registry
 │   │   ├── index.js
 │   │   ├── rainbow.js  bat-racers.js  blue-pup.js  web-hero.js  night-heroes.js
 │   └── games/              # one folder per game + index.js registry
 │       ├── index.js
-│       ├── animals/  bubbles/  match/  soundboard/
+│       ├── animals/  bubbles/  balloons/  trace/  match/  numbers/  letters/  soundboard/
 ├── .github/workflows/deploy.yml   # auto-deploys to GitHub Pages on push
-└── CONTRIBUTING.md         # how to add new games and themes
+├── CONTRIBUTING.md         # how to add new games and themes
+└── ROADMAP.md              # backlog of next-step ideas & improvements
 ```
 
 ## Adding more games or themes
 
 It's designed to grow. See **[CONTRIBUTING.md](CONTRIBUTING.md)** — adding a game is
 "make a folder, write one file, add one import line." Adding a theme is even smaller.
+
+For a running list of **next-step ideas and improvements** (new games, difficulty
+tweaks, themes, offline/PWA, a parent settings panel, and more), see
+**[ROADMAP.md](ROADMAP.md)** — there's always something to reach for.
 
 ## Deployment
 
