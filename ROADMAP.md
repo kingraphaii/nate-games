@@ -15,7 +15,8 @@ Check items off as they ship, and add your own.
 Games: Animal Friends · Bubble Pop · Balloon Bash · Trace Trails · Match It ·
 Count With Me · Letter Sounds · Music Maker.
 Engine: theme system (5 presets + Surprise) · synthesized audio + speech ·
-animated background · confetti · combo/juice system · global mute.
+animated background · confetti · combo/juice system · global mute ·
+`ctx.activatable` hover-dwell (rest-to-activate, in Letter Sounds).
 
 ---
 
@@ -58,6 +59,8 @@ animated background · confetti · combo/juice system · global mute.
 
 ## ♿ Accessibility & little-kid UX
 
+- [x] 🟡 **Hover-dwell (rest-to-activate).** Shared `ctx.activatable` helper: any target fires on a click *or* on the cursor resting ~0.9s, with a progress ring tracing its outline. ✅ shipped (`src/core/activatable.js`), first adopter Letter Sounds.
+- [ ] 🟢 **Roll dwell out to the other quiz games** — Animal Friends, Match It, Count With Me already use the same "choose a card" pattern; swap their click listeners for `ctx.activatable` (one line each).
 - [ ] 🟢 **Even bigger hit targets / spacing** option for the youngest hands.
 - [ ] 🟡 **Keyboard + switch support** — full play via Tab/Enter/Space and arrow keys (some of this exists via buttons).
 - [ ] 🟡 **High-contrast theme** for low vision.

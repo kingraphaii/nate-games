@@ -16,6 +16,7 @@ import { audio } from './audio.js';
 import { Background } from './background.js';
 import { Confetti } from './confetti.js';
 import { EdgeScroller } from './edge-scroll.js';
+import { makeActivatable } from './activatable.js';
 import { shuffle, pick } from './game-api.js';
 
 const STORAGE_KEY = 'nate-games:theme';
@@ -185,6 +186,7 @@ class App {
       palette: this.theme.palette,
       exit: () => { location.hash = ''; },
       confetti: (x, y, opts) => this.confetti.burst(x, y, opts),
+      activatable: (el, onActivate, opts) => makeActivatable(el, onActivate, opts),
       shuffle,
       pick,
     };

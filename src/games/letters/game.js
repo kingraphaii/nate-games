@@ -91,18 +91,19 @@ export default {
         btn.style.setProperty('--card', CARD_COLORS[i % CARD_COLORS.length]);
         btn.textContent = entry.letter;
         btn.setAttribute('aria-label', `Letter ${entry.letter}`);
-        btn.addEventListener('click', (e) => onPick(entry, btn, e));
+        // Fire on a click OR on resting the cursor here ~0.9s (toddler-friendly).
+        ctx.activatable(btn, (hit) => onPick(entry, btn, hit), { dwellMs: 900 });
         gridEl.appendChild(btn);
       });
       ask();
     }
 
-    function onPick(entry, btn, e) {
+    function onPick(entry, btn, hit) {
       if (busy) return;
       if (entry.letter === target.letter) {
         busy = true;
         ctx.audio.cheer();
-        ctx.confetti(e.clientX, e.clientY);
+        ctx.confetti(hit.x, hit.y);
         btn.classList.add('wiggle');
 
         // Reveal the phonics: letter, its sound, and an example word + picture.

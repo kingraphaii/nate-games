@@ -28,6 +28,12 @@
  *   ctx.palette -> shortcut to ctx.theme.palette
  *   ctx.exit()  -> return to the home screen
  *   ctx.confetti(x, y, opts) -> burst celebratory particles at a screen point
+ *   ctx.activatable(el, onActivate, opts) -> make an element fire on a click OR
+ *       on the cursor resting on it ~0.9s (a "dwell"), with a progress ring that
+ *       traces its outline. Toddler-friendly: no precise click needed. onActivate
+ *       gets { via: 'click'|'dwell', x, y } (x/y are viewport coords for confetti).
+ *       opts.dwellMs (default 900). Returns a disposer. Prefer this over a raw
+ *       click listener for any "choose this" target. See core/activatable.js.
  *   ctx.shuffle(array)       -> returns a new shuffled copy (handy helper)
  *   ctx.pick(array)          -> returns a random element
  *
