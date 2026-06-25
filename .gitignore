@@ -1,0 +1,14 @@
+# Local-only assets you may add later (kept out of the public repo).
+# Drop personal/copyrighted images here and they won't be committed.
+assets/private/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Logs / scratch
+*.log
+node_modules/

@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Little Games — global styles
+   Theme palette is injected as CSS variables by core/app.js (applyTheme).
+   Design goals: BIG mouse targets, obvious hover/active feedback, playful.
+   ========================================================================== */
+
+:root {
+  --bg1: #6dd5ed;
+  --bg2: #b06ab3;
+  --primary: #ff7a59;
+  --accent: #ffd166;
+  --surface: rgba(255, 255, 255, 0.92);
+  --text: #2b2d42;
+  --text-muted: #5c5f73;
+  --radius: 28px;
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  --font: 'Baloo 2', 'Comic Sans MS', 'Trebuchet MS', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: var(--font);
+  color: var(--text);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Big friendly cursor helps a child track the pointer. */
+body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg filter='drop-shadow(0 2px 2px rgba(0,0,0,.4))'%3E%3Cpath d='M8 6 L8 34 L16 27 L21 38 L27 35 L22 24 L33 24 Z' fill='white' stroke='%23333' stroke-width='2' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E") 6 4, auto; }
+
+#bg-canvas, #confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+#confetti-canvas { z-index: 50; pointer-events: none; }
+
+.screen {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+[hidden] { display: none !important; }
+
+/* ---- Top-right icon controls ------------------------------------------- */
+.icon-btn {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 60;
+  width: 58px;
+  height: 58px;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 26px;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.icon-btn:hover { transform: scale(1.1); }
+.icon-btn:active { transform: scale(0.94); }
+
+/* ---- Home screen -------------------------------------------------------- */
+.home-header { text-align: center; padding: 28px 16px 8px; }
+.title {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 4.4rem);
+  color: #fff;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.18), 0 8px 22px rgba(0, 0, 0, 0.25);
+  letter-spacing: 1px;
+}
+.subtitle {
+  margin: 6px 0 0;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Theme switcher */
+.theme-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 14px 16px;
+}
+.theme-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.theme-chip .chip-emoji { font-size: 1.4rem; }
+.theme-chip:hover { transform: translateY(-3px) scale(1.04); }
+.theme-chip:active { transform: scale(0.96); }
+.theme-chip.is-active { border-color: var(--primary); }
+.theme-chip--surprise { background: var(--accent); }
+
+/* Game grid */
+.game-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+  align-content: start;
+  padding: 18px clamp(16px, 5vw, 60px) 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  overflow-y: auto;
+}
+.game-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 26px 18px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+  min-height: 190px;
+  justify-content: center;
+}
+.game-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+}
+.game-card:active { transform: scale(0.97); }
+.game-emoji { font-size: 4.2rem; line-height: 1; }
+.game-name { font-size: 1.5rem; font-weight: 800; }
+.game-blurb { font-size: 0.95rem; color: var(--text-muted); text-align: center; }
+
+.home-footer {
+  text-align: center;
+  padding: 10px 16px 20px;
+  color: #fff;
+  font-size: 1.05rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ---- Play screen -------------------------------------------------------- */
+.play-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+}
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s ease;
+}
+.back-btn:hover { transform: scale(1.06); }
+.back-btn:active { transform: scale(0.95); }
+.play-title {
+  margin: 0;
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.play-spacer { flex: 1; }
+.play-area {
+  flex: 1;
+  position: relative;
+  margin: 6px clamp(12px, 4vw, 40px) clamp(12px, 4vw, 30px);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* ---- Shared helpers games can use --------------------------------------- */
+.big-prompt {
+  text-align: center;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-weight: 800;
+  color: var(--text);
+  padding: 14px;
+}
+.pop-in { animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+@keyframes popIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.wiggle { animation: wiggle 0.4s ease; }
+@keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-7deg)} 75%{transform:rotate(7deg)} }
+.shake { animation: shake 0.4s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)} }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.05s !important; }
+}

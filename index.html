@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#6dd5ed" />
+  <title>Little Games 🎮</title>
+  <meta name="description" content="Whimsical, mouse-friendly educational games for little kids." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Animated themed background + reward confetti (full-screen canvases) -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- Top-right controls, always visible -->
+  <button id="mute-btn" class="icon-btn" aria-pressed="false" title="Mute / unmute">🔊</button>
+
+  <!-- HOME SCREEN -->
+  <main id="home" class="screen">
+    <header class="home-header">
+      <h1 class="title">Little Games</h1>
+      <p class="subtitle">Pick a game and have fun! 🎉</p>
+    </header>
+
+    <nav id="theme-bar" class="theme-bar" aria-label="Choose a background theme"></nav>
+
+    <section id="game-grid" class="game-grid" aria-label="Games"></section>
+
+    <footer class="home-footer">Move the mouse, click the pictures, and listen! 🐭🖱️</footer>
+  </main>
+
+  <!-- PLAY SCREEN -->
+  <section id="play" class="screen play" hidden>
+    <header class="play-bar">
+      <button id="back-btn" class="back-btn" title="Back to games">🏠 <span>Home</span></button>
+      <h2 id="game-title" class="play-title"></h2>
+      <span class="play-spacer" aria-hidden="true"></span>
+    </header>
+    <div id="play-area" class="play-area"></div>
+  </section>
+
+  <script type="module" src="src/core/app.js"></script>
+</body>
+</html>
