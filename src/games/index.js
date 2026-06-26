@@ -18,11 +18,11 @@ import trace from './trace/game.js';
 import match from './match/game.js';
 import numbers from './numbers/game.js';
 import letters from './letters/game.js';
-import soundboard from './soundboard/game.js';
+import music from './music/game.js';
 
 import { assertValidGame } from '../core/game-api.js';
 
-export const GAMES = [animals, peekaboo, bubbles, balloons, fruit, trace, match, numbers, letters, soundboard].map(assertValidGame);
+export const GAMES = [animals, peekaboo, bubbles, balloons, fruit, trace, match, numbers, letters, music].map(assertValidGame);
 
 export function getGame(id) {
   return GAMES.find((g) => g.id === id) || null;
