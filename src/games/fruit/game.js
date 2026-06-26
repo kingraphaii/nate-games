@@ -1,8 +1,9 @@
 /**
  * Fruit Slice — a toddler-friendly Fruit Ninja. Nate likes fruit. 🍉
  *
- * Big, juicy fruits arc up from the bottom in slow, gentle tosses. Swipe the
- * pointer through them (or just tap) to slice: each fruit splits into two
+ * Big, juicy fruits arc up from the bottom in slow, gentle tosses. Just *move*
+ * the pointer through them to slice — no click or button-hold needed, since
+ * little ones aren't reliable with an external mouse yet. Each fruit splits into two
  * halves that tumble away, juice splatters in its color, and a "+N" floats up.
  * Slicing several fruits in one swipe — or in quick succession — builds the
  * shared combo multiplier (×2 → ×5). Now and then a sparkly rainbow fruit
@@ -33,9 +34,9 @@ const SPAWN_MS = 950;       // base time between tosses
 const MAX_FRUIT = 9;        // cap on concurrent fruit (keeps it calm)
 const MIN_SIZE = 76;        // smallest fruit (px)
 const MAX_SIZE = 118;       // largest fruit (px)
-const GRAVITY = 680;        // px per second^2 — gentle, toddler-paced arcs
-const LAUNCH_MIN = 640;     // slowest upward toss speed (px/s)
-const LAUNCH_MAX = 800;     // fastest upward toss speed (px/s)
+const GRAVITY = 440;        // px per second^2 — gentle, toddler-paced arcs
+const LAUNCH_MIN = 520;     // slowest upward toss speed (px/s)
+const LAUNCH_MAX = 650;     // fastest upward toss speed (px/s)
 const CLUSTER_CHANCE = 0.4; // chance a toss throws an extra fruit or two
 const SPECIAL_CHANCE = 0.09;// chance a fruit is a rainbow bonus fruit
 const SPECIAL_BONUS = 5;    // extra points a rainbow fruit awards
@@ -45,7 +46,7 @@ export default {
   id: 'fruit',
   title: 'Fruit Slice',
   emoji: '🍉',
-  blurb: 'Swipe to slice the fruit!',
+  blurb: 'Wave the mouse to slice the fruit!',
   tags: ['mouse', 'fruit'],
 
   mount(root, ctx) {
@@ -82,8 +83,8 @@ export default {
     let rafId = null;
     let lastTime = 0;
 
-    // Blade-trail state: recent pointer points (layer-relative) while swiping.
-    let swiping = false;
+    // Blade-trail state: recent pointer points (layer-relative). The blade is
+    // ALWAYS live — moving the pointer slices, no click/hold required.
     let trail = [];        // [{ x, y, t }]
     let prevPt = null;     // last point, for segment-vs-fruit hit tests
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -248,29 +249,30 @@ export default {
       }
     }
 
+    // Any pointer contact (tap/click) slices what's under it — but it's optional.
     function onDown(e) {
-      swiping = true;
       const p = localPoint(e);
       prevPt = p;
       trail = [{ x: p.x, y: p.y, t: performance.now() }];
-      hitTest(p, p); // a tap slices whatever is under it
+      hitTest(p, p);
     }
+    // Hover-slice: just moving the pointer drags the blade through the fruit.
     function onMove(e) {
-      if (!swiping) return;
       const p = localPoint(e);
       trail.push({ x: p.x, y: p.y, t: performance.now() });
       if (prevPt) hitTest(prevPt, p);
+      else hitTest(p, p);
       prevPt = p;
     }
-    function onUp() {
-      swiping = false;
+    // Pointer left the play area — break the blade so we don't draw/slice across
+    // the gap when it returns.
+    function onLeave() {
       prevPt = null;
     }
 
     layer.addEventListener('pointerdown', onDown);
     layer.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    layer.addEventListener('pointerleave', onUp);
+    layer.addEventListener('pointerleave', onLeave);
     layer.style.touchAction = 'none';
 
     /** Draw the fading blade trail from the recent pointer points. */
@@ -333,7 +335,6 @@ export default {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = null;
       window.removeEventListener('resize', sizeCanvas);
-      window.removeEventListener('pointerup', onUp);
       for (const f of fruits) f.el.remove();
       fruits.clear();
     };
