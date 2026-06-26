@@ -97,6 +97,17 @@ export default {
       // Confetti from the centre of this window.
       const r = door.getBoundingClientRect();
       ctx.confetti(r.left + r.width / 2, r.top + r.height / 2);
+
+      // Everyone's out? Cheer, then shuffle in a fresh set to start over.
+      if (gridEl.querySelectorAll('.pk-door.is-open').length === DOOR_COUNT) {
+        promptEl.textContent = `Hooray! Everyone's here! 🎉`;
+        timers.push(setTimeout(() => {
+          ctx.audio.cheer();
+          ctx.speak('Yay! Here come new friends!');
+          promptEl.textContent = `New friends! Who's hiding now? 👀`;
+          deal();
+        }, 1800));
+      }
     }
 
     function close(door) {
@@ -126,13 +137,15 @@ function injectStyles() {
   css.id = 'peekaboo-styles';
   css.textContent = `
     .pk { height:100%; display:flex; flex-direction:column; align-items:center;
-      justify-content:center; gap:14px; padding:16px; }
+      justify-content:safe center; gap:14px; padding:16px; overflow-y:auto; }
     .pk-shuffle { padding:10px 20px; border:none; border-radius:999px; background:var(--accent);
       font-family:var(--font); font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:var(--shadow); }
     .pk-shuffle:hover { transform:scale(1.05); } .pk-shuffle:active { transform:scale(0.95); }
 
+    /* 3 cols of square cells → grid height ≈ ²⁄₃ width. Cap width by height too
+       (~108vh) so two rows clear short / landscape screens without clipping. */
     .pk-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:18px;
-      width:min(92vw, 760px); }
+      width:min(92vw, 760px, 108vh); }
     @media (max-width: 520px) { .pk-grid { grid-template-columns:repeat(2, 1fr); } }
 
     /* Each window: a stage behind, two curtains in front. */
