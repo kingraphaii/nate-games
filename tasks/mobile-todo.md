@@ -31,8 +31,24 @@ Notes for tomorrow's PWA pass:
   padding so standalone-mode content sits below the status bar.
 - Custom mouse cursor is now gated behind `@media (hover: hover)`.
 
-## Next (PWA — separate task)
-- `manifest.webmanifest` (name, short_name, start_url, display: standalone, theme/bg color, icons)
-- App icons (192 / 512 / maskable) + apple-touch-icon
-- Service worker: precache the static shell (HTML/CSS/JS modules) for offline + installability
-- Register the SW from app.js; link the manifest from index.html
+## PWA pass (done 2026-06-26)
+- [x] `manifest.webmanifest` (name, short_name, start_url ".", scope ".", display: standalone, theme/bg color, icons)
+- [x] App icons (192 / 512 / maskable) + apple-touch-icon — vector gamepad on aqua gradient
+- [x] Service worker (`sw.js`): precache the full static shell (all 25 JS modules + HTML/CSS/icons) for offline + installability; stale-while-revalidate runtime strategy
+- [x] Register the SW from app.js; link the manifest + apple-touch-icon from index.html
+
+### PWA review
+Verified in a real browser at `localhost`: SW registers with scope `/` (state `activated`,
+controlling the page), manifest parses as "Little Games", apple-touch-icon linked. **Offline
+test passed** — with the server killed, a reload rendered the full app (10 game cards, 6 theme
+chips) entirely from cache.
+
+Key decisions:
+- **Relative paths everywhere** (`start_url "."`, `register(new URL('sw.js', document.baseURI))`,
+  relative precache list) so it works both locally and under the `/nate-games/` Pages base path.
+- **Icons built without emoji/SVG-gradient deps.** ImageMagick's internal SVG renderer ignores
+  `url(#gradient)` fills, so `assets/controller.svg` (white gamepad, transparent bg) is composited
+  onto an IM-generated gradient. Regenerate with `assets/build-icons.sh`.
+- **Precache = whole app.** Every game/theme is statically imported at boot, so the install-time
+  list is the entire module graph — no lazy chunks to miss. Bump `CACHE` in `sw.js` to ship updates.
+- Workflow already uploads the whole repo to Pages, so the new files deploy with no CI change.

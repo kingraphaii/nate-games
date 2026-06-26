@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Game controller only (transparent background); the gradient backdrop is
+       composited in by the icon build so it rasterises reliably. -->
+  <g fill="#ffffff">
+    <circle cx="150" cy="316" r="62"/>
+    <circle cx="362" cy="316" r="62"/>
+    <rect x="110" y="196" width="292" height="124" rx="58"/>
+  </g>
+  <g fill="#2a3b6b">
+    <rect x="148" y="243" width="64" height="22" rx="7"/>
+    <rect x="169" y="222" width="22" height="64" rx="7"/>
+  </g>
+  <circle cx="348" cy="230" r="15" fill="#ff6b6b"/>
+  <circle cx="372" cy="254" r="15" fill="#ffd93d"/>
+  <circle cx="348" cy="278" r="15" fill="#4dd0a8"/>
+  <circle cx="324" cy="254" r="15" fill="#7aa8ff"/>
+</svg>

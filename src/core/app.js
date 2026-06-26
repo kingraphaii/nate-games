@@ -234,3 +234,13 @@ class App {
 }
 
 window.addEventListener('DOMContentLoaded', () => new App());
+
+// Register the service worker for offline play + installability (PWA).
+// `document.baseURI` keeps the scope correct under the /nate-games/ base path.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register(new URL('sw.js', document.baseURI))
+      .catch((err) => console.warn('Service worker registration failed:', err));
+  });
+}
