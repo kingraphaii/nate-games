@@ -31,7 +31,12 @@ class AudioEngine {
       this.master.gain.value = 0.6;
       this.master.connect(this.ctx.destination);
     }
-    if (this.ctx.state === 'suspended') this.ctx.resume();
+    // Only resume after a genuine user gesture. Hover (mouseenter/mousemove)
+    // doesn't count as activation, and resuming without one makes Chrome spam
+    // "AudioContext was not allowed to start" warnings. `hasBeenActive` is true
+    // once the user has clicked/tapped/keyed even once, and stays true after.
+    const activated = navigator.userActivation ? navigator.userActivation.hasBeenActive : true;
+    if (activated && this.ctx.state === 'suspended') this.ctx.resume();
     this._pickVoice();
   }
 

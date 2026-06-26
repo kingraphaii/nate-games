@@ -27,7 +27,8 @@ export function makeActivatable(el, onActivate, opts = {}) {
   let ring = null;   // <svg> progress overlay, created lazily on first dwell
   let rect = null;   // the traced <rect> inside it
   let anim = null;   // the running Web Animation
-  let fired = false; // guard against double-activation
+  let fired = false; // brief guard against a click + dwell double-fire
+  let cooldown = null; // timer that releases `fired` so the element can re-fire
 
   function centerOf() {
     const r = el.getBoundingClientRect();
@@ -45,6 +46,11 @@ export function makeActivatable(el, onActivate, opts = {}) {
     cancel();
     const c = ev ? { x: ev.clientX, y: ev.clientY } : centerOf();
     onActivate({ via, x: c.x, y: c.y });
+    // Release the guard shortly after so persistent targets (e.g. piano keys)
+    // can be activated again. The brief window still blocks a click landing on
+    // the same gesture that just completed a dwell.
+    clearTimeout(cooldown);
+    cooldown = setTimeout(() => { fired = false; }, 300);
   }
 
   /** Build (once) and size the ring to trace the element's current outline. */
@@ -99,7 +105,10 @@ export function makeActivatable(el, onActivate, opts = {}) {
     anim.onfinish = () => fire('dwell');
   }
 
-  function onEnter() { start(); }
+  // Dwell only makes sense for a hovering pointer (mouse/trackpad/pen). On touch
+  // a tap fires enter→leave instantly, which would just flash the ring — so we
+  // skip it and let the plain click handler activate instead.
+  function onEnter(e) { if (e.pointerType === 'mouse' || e.pointerType === 'pen') start(); }
   function onLeave() { if (!fired) cancel(); }
   function onClick(e) { fire('click', e); }
 
@@ -109,6 +118,7 @@ export function makeActivatable(el, onActivate, opts = {}) {
   el.addEventListener('click', onClick);
 
   return function dispose() {
+    clearTimeout(cooldown);
     cancel();
     el.removeEventListener('pointerenter', onEnter);
     el.removeEventListener('pointerleave', onLeave);

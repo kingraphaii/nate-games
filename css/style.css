@@ -21,16 +21,26 @@
 
 html, body {
   margin: 0;
+  /* dvh tracks the *visible* viewport, so a phone's address bar showing/hiding
+     never crops the footer or play area. height:100% is the older fallback. */
   height: 100%;
+  height: 100dvh;
   font-family: var(--font);
   color: var(--text);
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  /* Touch: kill the 300ms double-tap delay/zoom and stop pull-to-refresh and
+     rubber-band bounce so swipes stay inside the game. */
+  touch-action: manipulation;
+  overscroll-behavior: none;
 }
 
-/* Big friendly cursor helps a child track the pointer. */
-body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg filter='drop-shadow(0 2px 2px rgba(0,0,0,.4))'%3E%3Cpath d='M8 6 L8 34 L16 27 L21 38 L27 35 L22 24 L33 24 Z' fill='white' stroke='%23333' stroke-width='2' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E") 6 4, auto; }
+/* Big friendly cursor helps a child track the pointer — only where there's an
+   actual pointer (no effect on touch screens). */
+@media (hover: hover) {
+  body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg filter='drop-shadow(0 2px 2px rgba(0,0,0,.4))'%3E%3Cpath d='M8 6 L8 34 L16 27 L21 38 L27 35 L22 24 L33 24 Z' fill='white' stroke='%23333' stroke-width='2' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E") 6 4, auto; }
+}
 
 #bg-canvas, #confetti-canvas {
   position: fixed;
@@ -45,6 +55,7 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
   position: relative;
   z-index: 10;
   height: 100%;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -53,8 +64,9 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 /* ---- Top-right icon controls ------------------------------------------- */
 .controls {
   position: fixed;
-  top: 14px;
-  right: 14px;
+  /* Keep clear of the notch / Dynamic Island / rounded corners. */
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
   z-index: 60;
   display: flex;
   flex-direction: column;
@@ -71,13 +83,13 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
   cursor: pointer;
   transition: transform 0.12s ease, opacity 0.12s ease;
 }
-.icon-btn:hover { transform: scale(1.1); }
+@media (hover: hover) { .icon-btn:hover { transform: scale(1.1); } }
 .icon-btn:active { transform: scale(0.94); }
 /* "Off" toggle state: dim the icon so a grown-up can see it's disabled. */
 .icon-btn.is-off { opacity: 0.4; }
 
 /* ---- Home screen -------------------------------------------------------- */
-.home-header { text-align: center; padding: 28px 16px 8px; }
+.home-header { text-align: center; padding: max(28px, calc(env(safe-area-inset-top) + 14px)) 16px 8px; }
 .title {
   margin: 0;
   font-size: clamp(2.4rem, 7vw, 4.4rem);
@@ -117,7 +129,7 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
   transition: transform 0.12s ease, border-color 0.12s ease;
 }
 .theme-chip .chip-emoji { font-size: 1.4rem; }
-.theme-chip:hover { transform: translateY(-3px) scale(1.04); }
+@media (hover: hover) { .theme-chip:hover { transform: translateY(-3px) scale(1.04); } }
 .theme-chip:active { transform: scale(0.96); }
 .theme-chip.is-active { border-color: var(--primary); }
 .theme-chip--surprise { background: var(--accent); }
@@ -171,9 +183,11 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
   min-height: 190px;
   justify-content: center;
 }
-.game-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+@media (hover: hover) {
+  .game-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+  }
 }
 .game-card:active { transform: scale(0.97); }
 .game-emoji { font-size: 4.2rem; line-height: 1; }
@@ -182,7 +196,7 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 
 .home-footer {
   text-align: center;
-  padding: 10px 16px 20px;
+  padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
   color: #fff;
   font-size: 1.05rem;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -193,7 +207,9 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 16px;
+  padding: max(12px, calc(env(safe-area-inset-top) + 6px)) 16px 12px;
+  /* Leave room on the right so the title never slides under the fixed controls. */
+  padding-right: max(16px, calc(env(safe-area-inset-right) + 76px));
 }
 .back-btn {
   display: flex;
@@ -211,7 +227,7 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
   box-shadow: var(--shadow);
   transition: transform 0.12s ease;
 }
-.back-btn:hover { transform: scale(1.06); }
+@media (hover: hover) { .back-btn:hover { transform: scale(1.06); } }
 .back-btn:active { transform: scale(0.95); }
 .play-title {
   margin: 0;
@@ -223,11 +239,16 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 .play-area {
   flex: 1;
   position: relative;
-  margin: 6px clamp(12px, 4vw, 40px) clamp(12px, 4vw, 30px);
+  margin: 6px max(clamp(12px, 4vw, 40px), env(safe-area-inset-right))
+             calc(clamp(12px, 4vw, 30px) + env(safe-area-inset-bottom))
+             max(clamp(12px, 4vw, 40px), env(safe-area-inset-left));
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow);
   overflow: hidden;
+  /* Games own all input inside here — stop the browser hijacking finger
+     drags/taps for scrolling or zoom (fixes Trace/Fruit drag on touch). */
+  touch-action: none;
 }
 
 /* ---- Shared helpers games can use --------------------------------------- */
@@ -244,6 +265,21 @@ body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 @keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-7deg)} 75%{transform:rotate(7deg)} }
 .shake { animation: shake 0.4s ease; }
 @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)} }
+
+/* ---- Phones: tighter, two-up game grid so fewer scrolls reach every game --- */
+@media (max-width: 560px) {
+  .game-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 14px 14px 20px;
+  }
+  .game-card { min-height: 150px; padding: 18px 10px; gap: 6px; }
+  .game-emoji { font-size: 3.2rem; }
+  .game-name { font-size: 1.2rem; }
+  .game-blurb { font-size: 0.85rem; }
+  .theme-bar { gap: 8px; padding: 10px 12px; }
+  .theme-chip { padding: 7px 13px; font-size: 0.95rem; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; transition-duration: 0.05s !important; }

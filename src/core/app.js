@@ -69,6 +69,8 @@ class App {
     root.setProperty('--text', p.text);
     root.setProperty('--text-muted', p.textMuted);
     this.bg.setTheme(theme);
+    // Match the mobile browser/PWA status bar to the theme's top color.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', p.bg1);
     if (persist) localStorage.setItem(STORAGE_KEY, theme.id);
     // Update which swatch is active.
     this.themeBar?.querySelectorAll('.theme-chip').forEach((el) => {
