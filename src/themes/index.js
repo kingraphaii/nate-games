@@ -32,8 +32,12 @@ import bluePup from './blue-pup.js';
 import webHero from './web-hero.js';
 import nightHeroes from './night-heroes.js';
 import rainbow from './rainbow.js';
+import ocean from './ocean.js';
+import space from './space.js';
+import dino from './dino.js';
+import farm from './farm.js';
 
-export const THEMES = [rainbow, batRacers, bluePup, webHero, nightHeroes];
+export const THEMES = [rainbow, batRacers, bluePup, webHero, nightHeroes, ocean, space, dino, farm];
 
 export function getTheme(id) {
   return THEMES.find((t) => t.id === id) || THEMES[0];
