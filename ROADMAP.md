@@ -41,7 +41,7 @@ per-game settings store (`ctx.settings`) · shared quiz-round scaffold
 - [ ] 🟢 **Count With Me — bigger range.** Add an easy/hard toggle: 1–5 (now) vs **1–10**. The grid + notes already scale; just raise `MAX_COUNT` behind a difficulty setting.
 - [ ] 🟢 **Letter Sounds — letter subsets.** Optional "just the letters in my name" or "A–F first" mode so a new learner isn't shown all 26 at once. Could also add a lowercase mode (a/A).
 - [ ] 🟢 **Match It — more shapes/colors,** and a "shape only" or "color only" mode to isolate one concept.
-- [ ] 🟢 **Animal Friends — more animals** and an optional real-animal-sound pack (kept as local-only assets; see Personalization).
+- [x] 🟢 **Animal Friends — more animals** (20 now) with an optional real-animal-sound pack. ✅ shipped (cast grown; `assets/sounds/animals/` + synth fallback)
 - [ ] 🟡 **Per-game difficulty** — a shared, tiny `difficulty` setting (easy/medium) games can read from `ctx`, instead of hard-coded constants. See Architecture below.
 - [ ] 🟡 **Replay/▶ Next buttons** consistently across all round-based games.
 
@@ -57,7 +57,7 @@ per-game settings store (`ctx.settings`) · shared quiz-round scaffold
 - [x] 🟢 **Volume slider** (not just mute) in the controls. ✅ shipped (⚙️ settings popover)
 - [x] 🟡 **Voice picker** — a grown-up chooses the speech voice; remembered. ✅ shipped (⚙️ settings popover)
 - [ ] 🟡 **Optional background music** — a soft, loopable synthesized tune with its own toggle.
-- [ ] 🟡 **Better phonics audio** — some browser voices say "buh" oddly; consider per-letter tuned utterances or short recorded clips (local assets).
+- [x] 🟡 **Better phonics audio** — optional recorded phonics clips per letter, with the synth as fallback. ✅ shipped (`assets/sounds/phonics/`; drop in tuned clips anytime)
 
 ## ♿ Accessibility & little-kid UX
 
@@ -89,7 +89,7 @@ per-game settings store (`ctx.settings`) · shared quiz-round scaffold
 - [x] 🟡 **Shared settings in `ctx`** — per-game `ctx.settings.get/set` on a safe localStorage wrapper. ✅ shipped (`src/core/store.js`)
 - [x] 🟡 **A round-based game helper** — shared quiz shell + pick-one loop with managed timers. ✅ shipped (`src/core/round.js`, first adopter Animal Friends)
 - [x] 🟡 **A tiny test harness** — CI smoke-loads the game/theme registries and verifies the service-worker precache + cache-version bump. ✅ shipped (`tools/`, `.github/workflows/ci.yml`)
-- [ ] 🟢 **Asset pipeline note** — document where optional local images/sounds go.
+- [x] 🟢 **Asset pipeline note** — where optional local sounds go, format, and the CI checks. ✅ shipped (`assets/sounds/README.md`, `CREDITS.md`)
 
 ## 🎨 Personalization (kept private)
 

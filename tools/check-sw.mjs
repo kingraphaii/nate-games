@@ -48,12 +48,14 @@ function walk(dir, keep) {
   return out;
 }
 
+const soundsManifest = 'assets/sounds/manifest.json';
 const expected = [
   'index.html',
   'manifest.webmanifest',
   ...walk('css', () => true),
   ...walk('src', (f) => f.endsWith('.js')),
   ...walk('assets', (f) => f.endsWith('.png') || /\.(mp3|m4a|ogg|wav)$/.test(f)),
+  ...(existsSync(path.join(root, soundsManifest)) ? [soundsManifest] : []),
 ];
 
 // ---- checks 1 + 2 -----------------------------------------------------------
@@ -63,6 +65,40 @@ for (const f of expected) {
 }
 for (const f of listed) {
   if (!existsSync(path.join(root, f))) errors.push(`dead ASSETS entry (no such file): ${f}`);
+}
+
+// ---- check: recorded sounds are credited and match the manifest -------------
+// The manifest drives client preloading, so it must exactly match the files on
+// disk (a name with no file 404s; a file not listed is silently never used).
+// And every sound file needs a CREDITS.md line — the license ledger stays honest.
+const soundFiles = walk('assets/sounds', (f) => /\.(mp3|m4a|ogg|wav)$/.test(f));
+const creditsPath = path.join(root, 'assets/sounds/CREDITS.md');
+const credits = existsSync(creditsPath) ? readFileSync(creditsPath, 'utf8') : '';
+for (const f of soundFiles) {
+  const rel = f.replace(/^assets\/sounds\//, ''); // e.g. animals/cow.mp3
+  // Match the documented backticked token (`animals/cow.mp3`) so prose or a
+  // format example never counts as a credit.
+  if (!credits.includes('`' + rel + '`')) errors.push(`sound file has no CREDITS.md entry: ${rel}`);
+}
+
+// Manifest vs disk: base names per folder must match the actual files exactly.
+const manifestPath = path.join(root, soundsManifest);
+if (existsSync(manifestPath)) {
+  let manifest = {};
+  try { manifest = JSON.parse(readFileSync(manifestPath, 'utf8')); }
+  catch { errors.push(`${soundsManifest} is not valid JSON`); }
+  const onDisk = {};
+  for (const f of soundFiles) {
+    const [folder, file] = f.replace(/^assets\/sounds\//, '').split('/');
+    (onDisk[folder] ||= []).push(file.replace(/\.[^.]+$/, ''));
+  }
+  const folders = new Set([...Object.keys(manifest), ...Object.keys(onDisk)]);
+  for (const folder of folders) {
+    const listed = new Set(manifest[folder] || []);
+    const present = new Set(onDisk[folder] || []);
+    for (const n of listed) if (!present.has(n)) errors.push(`manifest lists ${folder}/${n} but no such file exists`);
+    for (const n of present) if (!listed.has(n)) errors.push(`${folder}/${n} exists but is missing from ${soundsManifest}`);
+  }
 }
 
 // ---- check 3: CACHE bump vs origin/main -------------------------------------
