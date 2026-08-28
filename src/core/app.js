@@ -19,6 +19,7 @@ import { EdgeScroller } from './edge-scroll.js';
 import { makeActivatable } from './activatable.js';
 import { shuffle, pick } from './game-api.js';
 import { load, save } from './store.js';
+import { initStickers, awardSticker } from './stickers.js';
 
 const STORAGE_KEY = 'nate-games:theme';
 const SCROLL_KEY = 'nate-games:autoscroll';
@@ -38,6 +39,7 @@ class App {
     this.scroller = new EdgeScroller(this.grid);
     this.current = null; // active game module
     this.theme = null;
+    initStickers({ confetti: (x, y, opts) => this.confetti.burst(x, y, opts), audio });
 
     this._initTheme();
     this._initAutoScroll();
@@ -196,6 +198,7 @@ class App {
         get: (key, fallback) => load(`g:${game.id}:${key}`, fallback),
         set: (key, value) => save(`g:${game.id}:${key}`, value),
       },
+      award: () => awardSticker(game.id),
     };
     const cleanup = game.mount(this.playArea, ctx);
     this._cleanup = typeof cleanup === 'function' ? cleanup : null;
