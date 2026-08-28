@@ -36,6 +36,8 @@ class App {
     this.grid = document.getElementById('game-grid');
     this.muteBtn = document.getElementById('mute-btn');
     this.scrollBtn = document.getElementById('scroll-btn');
+    this.settingsBtn = document.getElementById('settings-btn');
+    this.settingsPopover = document.getElementById('settings-popover');
     this.scroller = new EdgeScroller(this.grid);
     this.current = null; // active game module
     this.theme = null;
@@ -46,6 +48,7 @@ class App {
     this._renderThemeBar();
     this._renderGrid();
     this._wireChrome();
+    this._wireSettings();
     this._wireAudioUnlock();
     // Keep the "more below" fade in sync with scroll position.
     this.grid.addEventListener('scroll', () => this._updateScrollFade(), { passive: true });
@@ -231,6 +234,63 @@ class App {
       audio.pop();
       const on = this.scrollBtn.getAttribute('aria-pressed') !== 'true';
       this._setAutoScroll(on);
+    });
+  }
+
+  // ---- Sound settings popover (volume + speech voice) ----------------------
+  _wireSettings() {
+    const slider = document.getElementById('volume-slider');
+    const select = document.getElementById('voice-select');
+    const test = document.getElementById('voice-test');
+
+    slider.value = String(audio.getVolume());
+    // Live level while dragging; a pop on release gives an audible reference.
+    slider.addEventListener('input', () => {
+      audio.unlock();
+      audio.setVolume(parseFloat(slider.value));
+    });
+    slider.addEventListener('change', () => { audio.unlock(); audio.pop(); });
+
+    // The voice list populates asynchronously; (re)build it on open and when
+    // the browser signals the voices changed. Never read it at boot.
+    const buildVoices = () => {
+      const voices = audio.listVoices();
+      select.innerHTML = '';
+      const def = document.createElement('option');
+      def.value = '';
+      def.textContent = 'Default voice';
+      select.appendChild(def);
+      for (const v of voices) {
+        const opt = document.createElement('option');
+        opt.value = v.voiceURI;
+        opt.textContent = v.name;
+        select.appendChild(opt);
+      }
+      select.value = audio.voiceURI || '';
+    };
+    window.speechSynthesis?.addEventListener?.('voiceschanged', buildVoices);
+
+    select.addEventListener('change', () => {
+      audio.unlock();
+      audio.setVoice(select.value || null);
+    });
+    test.addEventListener('click', () => { audio.unlock(); audio.speak("Hello! Let's play!"); });
+
+    const setOpen = (open) => {
+      this.settingsPopover.hidden = !open;
+      this.settingsBtn.setAttribute('aria-expanded', String(open));
+      if (open) { slider.value = String(audio.getVolume()); buildVoices(); }
+    };
+    this.settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      audio.unlock();
+      setOpen(this.settingsPopover.hidden);
+    });
+    // Close on any tap outside the popover or its button.
+    document.addEventListener('pointerdown', (e) => {
+      if (this.settingsPopover.hidden) return;
+      if (this.settingsPopover.contains(e.target) || this.settingsBtn.contains(e.target)) return;
+      setOpen(false);
     });
   }
 
