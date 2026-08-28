@@ -167,7 +167,7 @@ function injectStyles() {
       filter:drop-shadow(0 8px 16px rgba(0,0,0,0.18)); }
     .match .round-reveal svg { width:clamp(90px,16vw,130px); height:clamp(90px,16vw,130px); }
     .match-card { width:clamp(120px,22vw,180px); height:clamp(120px,22vw,180px); border:none;
-      border-radius:32px; background:#fff; box-shadow:var(--shadow); cursor:pointer; display:flex;
+      border-radius:32px; background:var(--card-bg, #fff); box-shadow:var(--shadow); cursor:pointer; display:flex;
       align-items:center; justify-content:center; transition:transform .12s ease; }
     .match-card:hover { transform:translateY(-6px) scale(1.05); }
     .match-card:active { transform:scale(0.96); }

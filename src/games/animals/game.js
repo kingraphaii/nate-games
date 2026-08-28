@@ -89,7 +89,7 @@ function injectStyles() {
   css.id = 'animals-styles';
   css.textContent = `
     .animal-card { width:clamp(120px,22vw,200px); height:clamp(120px,22vw,200px); border:none;
-      border-radius:32px; background:#fff; box-shadow:var(--shadow); cursor:pointer; display:flex;
+      border-radius:32px; background:var(--card-bg, #fff); box-shadow:var(--shadow); cursor:pointer; display:flex;
       align-items:center; justify-content:center; transition:transform .12s ease; }
     .animal-card:hover { transform:translateY(-6px) scale(1.05); }
     .animal-card:active { transform:scale(0.96); }
