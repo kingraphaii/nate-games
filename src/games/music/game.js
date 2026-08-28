@@ -155,6 +155,17 @@ export default {
     root.innerHTML = `<div class="mz"><div class="mz-stage" id="mz-stage"></div></div>`;
     const stage = root.querySelector('#mz-stage');
 
+    // Music has no rounds, so milestones are counted taps: every 16th musical
+    // interaction (a band toggle, a key, a new dancer) is a sticker milestone.
+    let taps = 0;
+    const mctx = {
+      ...ctx,
+      tap: () => {
+        taps += 1;
+        if (taps % 16 === 0) ctx.award?.();
+      },
+    };
+
     let cleanupMode = null;
     function clearMode() {
       if (cleanupMode) { try { cleanupMode(); } catch (e) { console.error(e); } cleanupMode = null; }
@@ -181,7 +192,7 @@ export default {
           ctx.audio.unlock();
           ctx.audio.pop({ pitch: 1.15 });
           clearMode();
-          cleanupMode = m.start(stage, ctx, showMenu);
+          cleanupMode = m.start(stage, mctx, showMenu);
         });
         cards.appendChild(card);
       }
@@ -263,6 +274,7 @@ function startBand(stage, ctx, onBack) {
       el.classList.toggle('is-on', layer.active);
       a.pop({ pitch: layer.active ? 1.3 : 0.7 });
       bounce(el);
+      ctx.tap?.();
     });
     band.appendChild(el);
     return layer;
@@ -377,6 +389,7 @@ function startSong(stage, ctx, onBack) {
     a.unlock();
     a.note(key.note, { duration: 0.5, type: 'triangle' });
     bounce(el);
+    ctx.tap?.();
     const song = SONGS[songIdx];
     // Right note? advance + sparkle. Wrong note? just play it — no penalty.
     if (noteIdx < song.notes.length && key.note === song.notes[noteIdx]) {
@@ -390,6 +403,7 @@ function startSong(stage, ctx, onBack) {
 
   function finishSong() {
     const song = SONGS[songIdx];
+    ctx.award?.(); // a finished song is a sticker milestone
     prompt.textContent = `🎉 You played ${song.name}!`;
     Object.values(keyEls).forEach((el) => el.classList.remove('is-next'));
     a.cheer();
@@ -468,6 +482,7 @@ function startDance(stage, ctx, onBack) {
     a.note(note, { duration: 0.4, type: 'triangle', volume: 0.4 });
     bounce(el);
     ctx.confetti(clientX, clientY, { count: 10 });
+    ctx.tap?.();
   }
 
   // Tapping the floor adds a dancer; the back button (in the bar) is separate.

@@ -215,6 +215,8 @@ export default {
       floatText(gridEl, r.left + r.width / 2 - g.left, r.top + r.height * 0.32 - g.top, say,
         { color: '#fff', big: true });
 
+      ctx.award?.(); // every reveal is a sticker milestone
+
       // Everyone's out? Throw a little party, then deal a fresh cast.
       if (gridEl.querySelectorAll('.pk-door.is-open').length === DOOR_COUNT) {
         party();

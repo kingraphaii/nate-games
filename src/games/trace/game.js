@@ -224,6 +224,7 @@ export default {
                    lastDot.cy + stage.getBoundingClientRect().top);
       ctx.audio.cheer();
       ctx.speak(ctx.pick(PRAISE));
+      ctx.award?.(); // a finished shape is a sticker milestone
       later(() => {
         shapeIdx = (shapeIdx + 1) % order.length;
         loadShape(order[shapeIdx]);

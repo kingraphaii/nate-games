@@ -116,7 +116,10 @@ export default {
       // Combo + multiplier: quick consecutive pops earn more points.
       const { mult, streak, leveledUp } = combo.hit(performance.now());
       const gained = mult; // 1 point per pop, times the live multiplier
+      const before = popped;
       popped += gained;
+      // Every 10th pop is a sticker milestone.
+      if (Math.floor(popped / 10) > Math.floor(before / 10)) ctx.award?.();
 
       ctx.audio.pop({ pitch: pitch * (1 + (mult - 1) * 0.12) });
       // Confetti scales with the multiplier and matches the bubble color.
