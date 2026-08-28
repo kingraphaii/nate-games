@@ -12,10 +12,10 @@ server — and is hosted free on **GitHub Pages**.
 
 - **Big, forgiving click targets** with obvious hover/press feedback — perfect for a
   toddler learning to use an external mouse.
-- **Whimsical animated background** that you can switch between original, kid-friendly
-  themes (or hit **🎲 Surprise** for a random one). Themes are *inspired by* shows young
-  kids love — Bat Racers, Blue Pup, Web Hero, Night Heroes, Rainbow — using original colours
-  and shapes only (no copyrighted art, so it's safe to host publicly).
+- **Nine whimsical themes** you can switch between (or hit **🎲 Surprise** for a random
+  one) — Rainbow, Bat Racers, Blue Pup, Web Hero, Night Heroes, Ocean, Space, Dino, Farm.
+  Each restyles the animated background, the card tint, and the pointer. All original
+  colours and shapes (no copyrighted art, so it's safe to host publicly).
 - **Several games**, reachable from one home screen:
   | Game | What it teaches |
   |------|-----------------|
@@ -30,10 +30,14 @@ server — and is hosted free on **GitHub Pages**.
   | 🔢 **Count With Me** | Tap and count 1–5 — counting + one-to-one correspondence |
   | 🔤 **Letter Sounds** | Find a letter, learn its phonics sound — alphabet + reading |
   | 🎶 **Music Party** | Build a band, play a song, or throw a dance party — music + cause-and-effect |
-- **All sound is synthesized** (Web Audio) or spoken (browser speech synthesis), so there
-  are **no audio files** to download or license.
+- **Sound is synthesized** (Web Audio) or spoken (browser speech synthesis) — with
+  **optional recorded clips** (real animal sounds, tuned phonics) that drop in locally and
+  fall back to the synth when absent. See [`assets/sounds/README.md`](assets/sounds/README.md).
+- **Grown-up controls** behind a ⚙️ button: a volume slider and a speech-voice picker.
+  Several games have big **difficulty / mode chips** (count to 5 or 10, letter subsets,
+  shape-only vs colour-only matching), each remembered on this device.
 - **Installs as an app (PWA)** and works fully offline — great for the car or a plane.
-- Respects `prefers-reduced-motion` and has a global **mute** button.
+- Respects `prefers-reduced-motion` (calmer confetti, no shake) and has a global **mute** button.
 
 ## How to run it locally
 
@@ -59,11 +63,12 @@ nate-games/
 ├── sw.js                   # service worker: offline precache (bump CACHE to ship)
 ├── css/style.css           # global styles + theme variables + big-target UI
 ├── assets/                 # app icons (private/ is gitignored personal art)
+│   └── sounds/             # optional recorded clips + CREDITS/manifest (see its README)
 ├── src/
 │   ├── core/               # the reusable engine
 │   │   ├── app.js          # app shell: home grid, navigation, theme switching
 │   │   ├── game-api.js     # the contract every game implements (+ helpers)
-│   │   ├── audio.js        # synthesized tones + speech (no audio files)
+│   │   ├── audio.js        # synth tones + speech + optional recorded clips
 │   │   ├── background.js   # animated themed home background (canvas)
 │   │   ├── confetti.js     # celebratory particle bursts
 │   │   ├── juice.js        # shared "game feel": combos, multipliers, floating score
@@ -75,6 +80,7 @@ nate-games/
 │   ├── themes/             # one file per theme + index.js registry
 │   │   ├── index.js
 │   │   ├── rainbow.js  bat-racers.js  blue-pup.js  web-hero.js  night-heroes.js
+│   │   ├── ocean.js  space.js  dino.js  farm.js
 │   └── games/              # one folder per game + index.js registry
 │       ├── index.js
 │       ├── stickers/  animals/  peekaboo/  bubbles/  balloons/

@@ -119,7 +119,8 @@ export default {
     bg2: '#4dd0e1',     // background gradient end
     primary: '#ff7043', // main accent (buttons, highlights)
     accent: '#ffd54f',  // secondary accent
-    surface: 'rgba(255,255,255,0.92)', // card background
+    surface: 'rgba(255,255,255,0.92)', // chrome/card surface
+    card: '#eef7ff',    // optional: in-game card tint (defaults to #fff)
     text: '#0d2b45',    // main text
     textMuted: '#3f6680',
   },
