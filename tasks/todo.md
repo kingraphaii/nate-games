@@ -1,29 +1,26 @@
-# Upgrade pass — Stage 1: Foundations (`chore/foundations`, issue #1, PR #2)
+# Upgrade pass — Stage 2: Deeper quiz games (`feat/deeper-quiz-games`, issue #3)
 
-Six-stage pass: 1 Foundations · 2 Deeper quiz games · 3 Sticker book ·
+Six-stage pass: 1 Foundations ✅ · 2 Deeper quiz games · 3 Sticker book ·
 4 Audio controls · 5 Recorded sound packs · 6 Visual overhaul + docs sync.
 This file tracks the active stage only.
 
 ## Checklist
 
-- [x] `tools/smoke.mjs` — import game + theme registries, assert ids and palettes
-- [x] `tools/check-sw.mjs` — ASSETS completeness, dead entries, CACHE bump vs origin/main
-- [x] `.github/workflows/ci.yml` — syntax check + smoke + check-sw
-- [x] `src/core/store.js` — localStorage wrapper with in-memory fallback
-- [x] `src/core/round.js` — quizShell + pickOneRound (managed timers, dwell, Next)
-- [x] Migrate `src/games/animals/game.js` (fixes the speech-after-exit leak)
-- [x] `src/core/app.js` — `ctx.settings` (per-game, on store.js)
-- [x] `sw.js` — add store.js + round.js, bump CACHE → `little-games-v2`
-- [x] Docs: README table/tree, ROADMAP shipped items, CONTRIBUTING checklist
-- [x] Verify: CI checks fail on seeded errors; browser test (leak, dwell, tap, re-open)
-- [x] PR referencing #1 → PR #2, CI green
+- [x] `core/round.js` — `modeChips` (persisted chip groups) + `shell.started()`
+- [x] Match It — migrate to round.js; +oval/diamond/moon, +pink/teal/brown; Both/Shapes/Colors chips
+- [x] Count With Me — quizShell adoption; 1–5 / 1–10 chip; words + notes to ten; dwell on items
+- [x] Letter Sounds — migrate to round.js; A–F / A–M / All chips; ABC / abc toggle
+- [x] Animal Friends — cast 12 → 20 (data only)
+- [x] `sw.js` CACHE → `little-games-v3`
+- [x] Verify: chips persist across reload; pools respected; browser test per game; CI green
+- [ ] PR referencing #3
 
 ## Review
 
-- Animal Friends shrank from 117 to 87 lines and keeps only data + card styles.
-- The five seeded CI failures each produced a clear, specific error message.
-- Browser proof: after exit mid-celebration, `speechSynthesis.speaking` is false
-  and the play area is empty; dwell fires the card without a click; ▶ Next deals
-  a fresh round; untouched games run with a clean console.
-- Next stage after merge: `feat/deeper-quiz-games` (match, numbers, letters,
-  bigger animal cast, mode chips).
+- The "crescent" shape ships as **moon** — that is the word a 3-year-old says.
+- One bug found and fixed during browser testing: shape mode said
+  "Find the the diamond!" (a doubled article in the label helper).
+- Browser proof: A–F mode sampled 45 cards across 15 rounds and showed exactly
+  A–F; lowercase renders lowercase glyphs; the 1–10 chip produced rounds of 7,
+  8, and 9 items with a clean wrap; 25 animal rounds sampled all 20 cast
+  members; exits mid-celebration stay silent; the console stayed clean.
