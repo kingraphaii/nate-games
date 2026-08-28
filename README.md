@@ -19,6 +19,7 @@ server — and is hosted free on **GitHub Pages**.
 - **Several games**, reachable from one home screen:
   | Game | What it teaches |
   |------|-----------------|
+  | 📖 **Sticker Book** | Every game awards stickers — collect them all, kept on this device |
   | 🐮 **Animal Friends** | Listen and click the right animal — vocabulary + listening |
   | 🙈 **Peekaboo!** | Open the curtains to reveal a hidden friend — cause & effect, for the youngest |
   | 🫧 **Bubble Pop** | Pop floating bubbles (with combos) — pure mouse-control practice |
@@ -67,6 +68,7 @@ nate-games/
 │   │   ├── confetti.js     # celebratory particle bursts
 │   │   ├── juice.js        # shared "game feel": combos, multipliers, floating score
 │   │   ├── round.js        # shared quiz-round scaffold (prompt, replay, next)
+│   │   ├── stickers.js     # sticker catalog, milestones & unlock celebration
 │   │   ├── store.js        # safe localStorage wrapper (per-game settings)
 │   │   ├── activatable.js  # hover-dwell "rest to activate" helper
 │   │   └── edge-scroll.js  # mouse-position auto-scroll for the home grid
@@ -75,8 +77,8 @@ nate-games/
 │   │   ├── rainbow.js  bat-racers.js  blue-pup.js  web-hero.js  night-heroes.js
 │   └── games/              # one folder per game + index.js registry
 │       ├── index.js
-│       ├── animals/  peekaboo/  bubbles/  balloons/  fruit/
-│       ├── trace/  match/  numbers/  letters/  music/
+│       ├── stickers/  animals/  peekaboo/  bubbles/  balloons/
+│       ├── fruit/  trace/  match/  numbers/  letters/  music/
 ├── tools/                  # dev-only CI checks (registry smoke test, sw precache)
 ├── .github/workflows/      # GitHub Pages deploy + CI checks
 ├── CONTRIBUTING.md         # how to add new games and themes
