@@ -6,6 +6,7 @@
  * synthesis for spoken words. Browsers block audio until the user interacts,
  * so call `audio.unlock()` on the first click/keypress (the app does this).
  */
+import { load, save } from './store.js';
 
 const NOTES = {
   C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.0,
@@ -13,12 +14,20 @@ const NOTES = {
   F5: 698.46, G5: 783.99, A5: 880.0, C6: 1046.5,
 };
 
+const VOLUME_KEY = 'volume';
+const VOICE_KEY = 'voice';
+const DEFAULT_VOLUME = 0.6;
+
 class AudioEngine {
   constructor() {
     this.ctx = null;
     this.master = null;
     this.muted = false;
     this.voice = null;
+    // Persisted 0..1 playback level (independent of the instant mute toggle).
+    this.volume = clamp01(load(VOLUME_KEY, DEFAULT_VOLUME));
+    // A saved voice choice (voiceURI); resolved to a real voice in _pickVoice.
+    this.voiceURI = load(VOICE_KEY, null);
   }
 
   /** Lazily create the AudioContext after a user gesture. Safe to call often. */
@@ -28,7 +37,7 @@ class AudioEngine {
       if (!AC) return;
       this.ctx = new AC();
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.6;
+      this.master.gain.value = this.muted ? 0 : this.volume;
       this.master.connect(this.ctx.destination);
     }
     // Only resume after a genuine user gesture. Hover (mouseenter/mousemove)
@@ -42,8 +51,19 @@ class AudioEngine {
 
   setMuted(muted) {
     this.muted = muted;
-    if (this.master) this.master.gain.value = muted ? 0 : 0.6;
+    if (this.master) this.master.gain.value = muted ? 0 : this.volume;
     if (muted) window.speechSynthesis?.cancel();
+  }
+
+  /** Set the playback level (0..1). Persisted; independent of mute. */
+  setVolume(v) {
+    this.volume = clamp01(v);
+    save(VOLUME_KEY, this.volume);
+    if (this.master && !this.muted) this.master.gain.value = this.volume;
+  }
+
+  getVolume() {
+    return this.volume;
   }
 
   /** Play a single tone. type: sine|square|triangle|sawtooth. */
@@ -163,13 +183,39 @@ class AudioEngine {
   }
 
   _pickVoice() {
-    if (this.voice || !('speechSynthesis' in window)) return;
+    if (!('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return; // not populated yet (Chrome/iOS load async)
+
+    // A grown-up's saved choice wins — when it still exists on this device.
+    if (this.voiceURI) {
+      const chosen = voices.find((v) => v.voiceURI === this.voiceURI);
+      if (chosen) { this.voice = chosen; return; }
+      // Saved voice is gone (e.g. after an OS update): fall through and re-pick.
+    }
+    if (this.voice) return;
     // Prefer a clear English voice; fall back to whatever exists.
     this.voice =
       voices.find((v) => /en[-_]?(US|GB|AU)/i.test(v.lang) && /female|samantha|karen|moira|google/i.test(v.name)) ||
       voices.find((v) => /^en/i.test(v.lang)) ||
       voices[0] || null;
+  }
+
+  /** English voices for the picker, deduped by name (async-populated). */
+  listVoices() {
+    if (!('speechSynthesis' in window)) return [];
+    const seen = new Set();
+    return window.speechSynthesis.getVoices()
+      .filter((v) => /^en/i.test(v.lang))
+      .filter((v) => (seen.has(v.name) ? false : seen.add(v.name)));
+  }
+
+  /** Choose a speech voice by voiceURI (persisted). null restores the default. */
+  setVoice(voiceURI) {
+    this.voiceURI = voiceURI || null;
+    save(VOICE_KEY, this.voiceURI);
+    this.voice = null;   // force a re-resolve on the next _pickVoice
+    this._pickVoice();
   }
 
   /** Speak text aloud in a slow, friendly, slightly higher voice. */
@@ -181,9 +227,14 @@ class AudioEngine {
     if (this.voice) u.voice = this.voice;
     u.rate = rate;
     u.pitch = pitch;
-    u.volume = volume;
+    // Speech follows the master volume too (best-effort; iOS may ignore it).
+    u.volume = clamp01(volume * this.volume);
     window.speechSynthesis.speak(u);
   }
+}
+
+function clamp01(n) {
+  return Math.max(0, Math.min(1, Number.isFinite(n) ? n : DEFAULT_VOLUME));
 }
 
 // Some browsers populate voices asynchronously.
