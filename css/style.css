@@ -88,6 +88,44 @@ html, body {
 /* "Off" toggle state: dim the icon so a grown-up can see it's disabled. */
 .icon-btn.is-off { opacity: 0.4; }
 
+/* ---- Sound settings popover (grown-up facing) -------------------------- */
+.settings-popover {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: calc(max(14px, env(safe-area-inset-right)) + 68px);
+  z-index: 61;
+  width: min(280px, 78vw);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: settingsPop 0.16s ease;
+}
+@keyframes settingsPop { from { opacity: 0; transform: translateY(-6px) scale(0.96); } }
+.settings-row { display: flex; align-items: center; gap: 10px; }
+.settings-voice { flex-wrap: wrap; }
+.settings-label {
+  font-family: var(--font); font-weight: 800; color: var(--text);
+  font-size: 1rem; white-space: nowrap;
+}
+.volume-slider { flex: 1; min-width: 120px; height: 30px; cursor: pointer; accent-color: var(--primary); }
+.voice-select {
+  flex: 1; min-width: 130px; min-height: 44px; padding: 6px 10px;
+  border: 2px solid var(--primary); border-radius: 12px; background: #fff;
+  font-family: var(--font); font-size: 0.95rem; color: var(--text); cursor: pointer;
+}
+.voice-test {
+  min-height: 44px; padding: 8px 14px; border: none; border-radius: 999px;
+  background: var(--accent); font-family: var(--font); font-weight: 800;
+  font-size: 0.95rem; cursor: pointer; box-shadow: var(--shadow);
+}
+@media (hover: hover) { .voice-test:hover { transform: scale(1.05); } }
+.voice-test:active { transform: scale(0.94); }
+@media (prefers-reduced-motion: reduce) { .settings-popover { animation: none; } }
+
 /* ---- Home screen -------------------------------------------------------- */
 .home-header { text-align: center; padding: max(28px, calc(env(safe-area-inset-top) + 14px)) 16px 8px; }
 .title {
