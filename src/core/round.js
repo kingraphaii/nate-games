@@ -78,17 +78,77 @@ export function quizShell(root, { className = '', startText = 'Tap to start! ðŸ‘
   });
 
   return {
+    shellEl,
     promptEl,
     revealEl,
     gridEl,
     setPrompt(text) { promptEl.textContent = text; },
     after,
     clearTimers,
+    started() { return started; },
     onStart(fn) { startFn = fn; },
     onReplay(fn) { replayFn = fn; },
     onNext(fn) { nextFn = fn; },
     dispose() { clearTimers(); },
   };
+}
+
+/**
+ * A persisted row of big mode chips (difficulty / mode selectors), rendered at
+ * the top of the shell. Safe to expose to the child â€” chips only re-deal the
+ * round, nothing is destructive.
+ *
+ *   modeChips(shell, ctx, { key, options, fallback, onChange })
+ *     key      -> ctx.settings key the choice persists under
+ *     options  -> [{ id, label }] (ids are JSON-safe: strings or numbers)
+ *     fallback -> id used when nothing is stored yet
+ *     onChange -> called with the new id after a tap re-deals (only once the
+ *                 game has started; pending shell timers are cleared first)
+ *
+ * Returns a getter for the active id. Multiple calls stack chip groups in one
+ * row (e.g. a letter-subset group next to an ABC/abc group).
+ */
+export function modeChips(shell, ctx, { key, options, fallback, onChange }) {
+  let current = ctx.settings.get(key, fallback);
+  // A stale stored id (option removed later) falls back silently.
+  if (!options.some((o) => o.id === current)) current = fallback;
+
+  let row = shell.shellEl.querySelector('.round-chips');
+  if (!row) {
+    row = document.createElement('div');
+    row.className = 'round-chips';
+    shell.shellEl.prepend(row);
+  }
+
+  const group = document.createElement('div');
+  group.className = 'chip-group';
+  for (const option of options) {
+    const chip = document.createElement('button');
+    chip.className = 'round-chip';
+    chip.textContent = option.label;
+    chip.classList.toggle('is-active', option.id === current);
+    chip.setAttribute('aria-pressed', String(option.id === current));
+    chip.addEventListener('click', () => {
+      if (option.id === current) return;
+      current = option.id;
+      ctx.settings.set(key, current);
+      for (const el of group.children) {
+        const active = el === chip;
+        el.classList.toggle('is-active', active);
+        el.setAttribute('aria-pressed', String(active));
+      }
+      // Only re-deal a running game; before the start gate the tap that picked
+      // the chip also starts the game (the shell's bubbling gate handles it).
+      if (shell.started()) {
+        shell.clearTimers();
+        onChange?.(current);
+      }
+    });
+    group.appendChild(chip);
+  }
+  row.appendChild(group);
+
+  return () => current;
 }
 
 /**
@@ -178,6 +238,14 @@ function injectShellStyles() {
     }
     .round-replay:active, .round-next:active { transform:scale(0.95); }
     .round-grid { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
+    .round-chips { display:flex; flex-wrap:wrap; gap:18px; justify-content:center; }
+    .chip-group { display:flex; gap:8px; }
+    .round-chip { min-height:44px; padding:8px 18px; border:none; border-radius:999px;
+      background:#fff; opacity:0.75; font-family:var(--font); font-size:1rem; font-weight:800;
+      color:var(--text); cursor:pointer; box-shadow:var(--shadow); transition:transform .12s ease; }
+    .round-chip.is-active { background:var(--primary); color:#fff; opacity:1; }
+    @media (hover: hover) { .round-chip:hover { transform:scale(1.06); } }
+    .round-chip:active { transform:scale(0.94); }
   `;
   document.head.appendChild(css);
 }
