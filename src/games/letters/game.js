@@ -89,6 +89,12 @@ export default {
       return getCase() === 'lower' ? entry.letter.toLowerCase() : entry.letter;
     }
 
+    // Optional recorded phonics: assets/sounds/phonics/<letter>.mp3. Only clips
+    // in the manifest are fetched; missing ones fall back to the spoken phonics.
+    const phonicsUrl = (entry) =>
+      new URL(`assets/sounds/phonics/${entry.letter.toLowerCase()}.mp3`, document.baseURI).href;
+    ctx.audio.preloadSet?.('phonics', LETTERS.map((e) => e.letter.toLowerCase()));
+
     const loop = pickOneRound(shell, ctx, {
       choices: () => ctx.shuffle(LETTERS.slice(0, POOLS[getPool()])).slice(0, 3),
       cardClass: 'letter-card',
@@ -111,8 +117,13 @@ export default {
         shell.revealEl.innerHTML = `<span class="reveal-emoji">${entry.emoji}</span>
           <span class="reveal-word">${entry.word}</span>`;
         shell.revealEl.classList.add('is-on');
-        // Phonics cadence: name, then sound twice, then the example word.
-        ctx.speak(`${entry.letter}. ${entry.sound}, ${entry.sound}, ${entry.word}!`);
+        // A tuned recorded phonics clip if we have it; otherwise the spoken
+        // cadence (name, sound twice, word) — the original, unchanged with no files.
+        const played = ctx.audio.playSample?.(phonicsUrl(entry), {
+          fallback: () => ctx.speak(`${entry.letter}. ${entry.sound}, ${entry.sound}, ${entry.word}!`),
+        });
+        // With a real clip, name the example word once the sound has played.
+        if (played) shell.after(1200, () => ctx.speak(`${entry.word}!`));
         return { delayMs: 2600 };
       },
     });
