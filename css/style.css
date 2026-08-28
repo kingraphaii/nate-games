@@ -39,7 +39,9 @@ html, body {
 /* Big friendly cursor helps a child track the pointer — only where there's an
    actual pointer (no effect on touch screens). */
 @media (hover: hover) {
-  body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg filter='drop-shadow(0 2px 2px rgba(0,0,0,.4))'%3E%3Cpath d='M8 6 L8 34 L16 27 L21 38 L27 35 L22 24 L33 24 Z' fill='white' stroke='%23333' stroke-width='2' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E") 6 4, auto; }
+  /* --cursor is set per theme by applyTheme; the inline default matches it so
+     the pointer is right even before the first paint. */
+  body { cursor: var(--cursor, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg filter='drop-shadow(0 2px 2px rgba(0,0,0,.4))'%3E%3Cpath d='M8 6 L8 34 L16 27 L21 38 L27 35 L22 24 L33 24 Z' fill='white' stroke='%23333' stroke-width='2' stroke-linejoin='round'/%3E%3C/g%3E%3C/svg%3E")) 6 4, auto; }
 }
 
 #bg-canvas, #confetti-canvas {

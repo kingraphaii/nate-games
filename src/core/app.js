@@ -74,6 +74,11 @@ class App {
     root.setProperty('--surface', p.surface);
     root.setProperty('--text', p.text);
     root.setProperty('--text-muted', p.textMuted);
+    // Card background: themes may tint it; default to white (the classic look).
+    root.setProperty('--card-bg', p.card || '#fff');
+    // A pointer tinted to the theme — white body + themed outline keeps the same
+    // silhouette and hotspot, so a child never loses it. Falls back in CSS.
+    root.setProperty('--cursor', cursorUrl(p.primary));
     this.bg.setTheme(theme);
     // Match the mobile browser/PWA status bar to the theme's top color.
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', p.bg1);
@@ -299,6 +304,19 @@ class App {
     window.addEventListener('pointerdown', unlock, { once: false });
     window.addEventListener('keydown', unlock, { once: false });
   }
+}
+
+/**
+ * Build a `url(...)` for the pointer, tinted per theme. Same 44px arrow, hotspot
+ * (6,4), and drop-shadow as the CSS default — only the outline is themed, over a
+ * white body, so the shape stays visible on any background.
+ */
+function cursorUrl(outline) {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'>`
+    + `<g filter='drop-shadow(0 2px 2px rgba(0,0,0,.4))'>`
+    + `<path d='M8 6 L8 34 L16 27 L21 38 L27 35 L22 24 L33 24 Z' fill='#fff' `
+    + `stroke='${outline || '#333'}' stroke-width='2.5' stroke-linejoin='round'/></g></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }
 
 window.addEventListener('DOMContentLoaded', () => new App());

@@ -157,13 +157,13 @@ function injectStyles() {
     @keyframes nuPop { 0%{transform:scale(0.6)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
     .numbers .round-grid { gap:18px; align-items:center; max-width:760px; }
     .count-item { position:relative; width:clamp(96px,18vw,150px); height:clamp(96px,18vw,150px);
-      border:none; border-radius:28px; background:#fff; box-shadow:var(--shadow); cursor:pointer;
+      border:none; border-radius:28px; background:var(--card-bg, #fff); box-shadow:var(--shadow); cursor:pointer;
       display:flex; align-items:center; justify-content:center; transition:transform .12s ease, opacity .2s ease; }
     .count-item:hover { transform:translateY(-6px) scale(1.05); }
     .count-item:active { transform:scale(0.95); }
     .count-emoji { font-size:clamp(3.2rem,9vw,5rem); line-height:1; }
     /* A counted item dims a little and shows its order number. */
-    .count-item.is-counted { background:#eafff0; }
+    .count-item.is-counted { background:var(--card-done, #eafff0); }
     .count-item.is-counted .count-emoji { opacity:0.55; }
     .count-badge { position:absolute; top:-10px; right:-10px; min-width:38px; height:38px;
       display:flex; align-items:center; justify-content:center; padding:0 8px;
