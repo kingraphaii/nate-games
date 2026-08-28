@@ -24,6 +24,14 @@ const ANIMALS = [
   { name: 'Bee', emoji: '🐝', sound: 'Bzzzz' },
   { name: 'Owl', emoji: '🦉', sound: 'Hoo hoo' },
   { name: 'Elephant', emoji: '🐘', sound: 'Trumpet' },
+  { name: 'Monkey', emoji: '🐵', sound: 'Ooh ooh ah ah' },
+  { name: 'Penguin', emoji: '🐧', sound: 'Waddle waddle' },
+  { name: 'Chicken', emoji: '🐔', sound: 'Cluck cluck' },
+  { name: 'Goat', emoji: '🐐', sound: 'Maa maa' },
+  { name: 'Mouse', emoji: '🐭', sound: 'Squeak squeak' },
+  { name: 'Tiger', emoji: '🐯', sound: 'Grrr' },
+  { name: 'Snake', emoji: '🐍', sound: 'Ssss' },
+  { name: 'Bear', emoji: '🐻', sound: 'Growl' },
 ];
 
 export default {
