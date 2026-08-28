@@ -28,6 +28,9 @@ class AudioEngine {
     this.volume = clamp01(load(VOLUME_KEY, DEFAULT_VOLUME));
     // A saved voice choice (voiceURI); resolved to a real voice in _pickVoice.
     this.voiceURI = load(VOICE_KEY, null);
+    // url -> AudioBuffer | 'pending' | 'failed'. Decoded recorded clips; a
+    // missing/failed entry just means the caller falls back to synth.
+    this._samples = new Map();
   }
 
   /** Lazily create the AudioContext after a user gesture. Safe to call often. */
@@ -180,6 +183,80 @@ class AudioEngine {
     src.start(t0);
     // A soft low "splat" gives the slice some juice.
     this.tone(240 * pitch, { duration: 0.09, type: 'sine', volume: volume * 0.5, glide: 0.6 });
+  }
+
+  /**
+   * Read the sounds manifest once (cached): { animals: [names], phonics: [...] }
+   * — the base names that actually have a file. Preloading is driven by this so
+   * a not-yet-recorded clip is never fetched (no 404 noise). Missing/empty
+   * manifest resolves to {}. The file is precached, so this is offline-safe.
+   */
+  soundManifest() {
+    if (this._manifestPromise) return this._manifestPromise;
+    const url = new URL('assets/sounds/manifest.json', document.baseURI).href;
+    this._manifestPromise = fetch(url)
+      .then((res) => (res.ok ? res.json() : {}))
+      .catch(() => ({}));
+    return this._manifestPromise;
+  }
+
+  /**
+   * Preload the clips that exist for a folder, given candidate base names.
+   * Only names present in the manifest are fetched, so nothing 404s. Build the
+   * matching playSample url the same way: assets/sounds/<folder>/<name>.<ext>.
+   */
+  async preloadSet(folder, names, ext = 'mp3') {
+    const manifest = await this.soundManifest();
+    const have = new Set(manifest[folder] || []);
+    const urls = names
+      .filter((n) => have.has(n))
+      .map((n) => new URL(`assets/sounds/${folder}/${n}.${ext}`, document.baseURI).href);
+    if (urls.length) this.preload(urls);
+  }
+
+  /**
+   * Fetch and decode recorded clips into the cache. Safe to call on mount and
+   * often — each url is fetched once. Missing files fail quietly; the caller
+   * falls back to a synthesized sound, so a not-yet-added clip is harmless.
+   * decodeAudioData works before a user gesture; only playback needs the gesture.
+   */
+  preload(urls) {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = this.muted ? 0 : this.volume;
+      this.master.connect(this.ctx.destination);
+    }
+    for (const url of urls) {
+      if (this._samples.has(url)) continue;
+      this._samples.set(url, 'pending');
+      fetch(url)
+        .then((res) => { if (!res.ok) throw new Error(String(res.status)); return res.arrayBuffer(); })
+        .then((buf) => this.ctx.decodeAudioData(buf))
+        .then((decoded) => this._samples.set(url, decoded))
+        .catch(() => this._samples.set(url, 'failed'));
+    }
+  }
+
+  /**
+   * Play a decoded clip through the master gain (so it inherits volume + mute).
+   * If the buffer is missing, still decoding, or failed, run `fallback` instead
+   * — the child always hears something. Returns true when a real clip played.
+   */
+  playSample(url, { volume = 1, fallback } = {}) {
+    const buffer = this._samples.get(url);
+    if (!buffer || buffer === 'pending' || buffer === 'failed') { fallback?.(); return false; }
+    if (this.muted) return false;
+    if (!this.ctx) { fallback?.(); return false; }
+    const src = this.ctx.createBufferSource();
+    src.buffer = buffer;
+    const gain = this.ctx.createGain();
+    gain.gain.value = clamp01(volume);
+    src.connect(gain).connect(this.master);
+    src.start();
+    return true;
   }
 
   _pickVoice() {

@@ -22,7 +22,11 @@
  *   }
  *
  * GameContext (`ctx`) passed to mount():
- *   ctx.audio   -> the shared Audio engine (see core/audio.js)
+ *   ctx.audio   -> the shared Audio engine (see core/audio.js). Beyond the
+ *       synth helpers it also has preload(urls) and playSample(url, {volume,
+ *       fallback}) for optional recorded clips: playSample runs `fallback` (a
+ *       synth sound) whenever the clip is missing, so a game works with zero
+ *       audio files present. Build clip urls with new URL(path, document.baseURI).
  *   ctx.speak(text, opts)   -> say a word/sentence out loud (child-friendly voice)
  *   ctx.theme   -> the active theme object (palette, name, glyphs)
  *   ctx.palette -> shortcut to ctx.theme.palette
