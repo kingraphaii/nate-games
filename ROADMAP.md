@@ -54,8 +54,8 @@ per-game settings store (`ctx.settings`) · shared quiz-round scaffold
 
 ## 🔊 Audio
 
-- [ ] 🟢 **Volume slider** (not just mute) in the controls.
-- [ ] 🟡 **Voice picker** — let a grown-up choose the speech voice/accent; remember it.
+- [x] 🟢 **Volume slider** (not just mute) in the controls. ✅ shipped (⚙️ settings popover)
+- [x] 🟡 **Voice picker** — a grown-up chooses the speech voice; remembered. ✅ shipped (⚙️ settings popover)
 - [ ] 🟡 **Optional background music** — a soft, loopable synthesized tune with its own toggle.
 - [ ] 🟡 **Better phonics audio** — some browser voices say "buh" oddly; consider per-letter tuned utterances or short recorded clips (local assets).
 
