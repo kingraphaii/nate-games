@@ -8,6 +8,7 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+.claude/
 
 # Logs / scratch
 *.log

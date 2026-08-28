@@ -46,17 +46,22 @@ export default {
 };
 ```
 
-### 3. Register it
+### 3. Register it — three places
 
-Open `src/games/index.js`, import your game, and add it to the `GAMES` array:
+1. Open `src/games/index.js`, import your game, and add it to the `GAMES` array:
 
 ```js
 import dino from './dino/game.js';
 // ...
-export const GAMES = [animals, bubbles, match, soundboard, dino].map(assertValidGame);
+export const GAMES = [animals, bubbles, match, dino].map(assertValidGame);
 ```
 
-That's it — it appears on the home screen. Refresh the page.
+2. Add the file to the `ASSETS` list in `sw.js` (so it works offline).
+3. Bump the `CACHE` constant in `sw.js` (e.g. `little-games-v2` → `little-games-v3`)
+   so installed apps pick up the change.
+
+CI enforces steps 2 and 3 — a missing `ASSETS` entry or a forgotten bump fails
+the build. The game appears on the home screen automatically. Refresh the page.
 
 > 💡 The best starting point is to **copy `src/games/animals/game.js`** — it's the
 > reference implementation and shows the round-based pattern, scoped CSS injection,
@@ -72,7 +77,14 @@ That's it — it appears on the home screen. Refresh the page.
 | `ctx.theme` / `ctx.palette` | The active theme and its colour palette (e.g. `ctx.palette.primary`). |
 | `ctx.shuffle(arr)` | Returns a shuffled **copy** of an array. |
 | `ctx.pick(arr)` | Returns a random element. |
+| `ctx.activatable(el, onActivate, opts)` | Make an element fire on a click **or** on the cursor resting on it ~0.9 s, with a progress ring. Prefer it over a raw click listener for any "choose this" target. |
+| `ctx.settings` | Per-game persistent settings: `get(key, fallback)` / `set(key, value)`. JSON-safe values only. |
 | `ctx.exit()` | Return to the home screen. |
+
+For a round-based quiz game (prompt → choices → cheer → next round), build on
+`core/round.js` (`quizShell` + `pickOneRound`) instead of hand-rolling the
+frame — it manages the tap-to-start gate, the 🔊/▶ buttons, and round timers
+that must not outlive the game. `src/games/animals/game.js` is the reference.
 
 ### Game rules of thumb (this is for a 3-year-old)
 
@@ -128,6 +140,8 @@ export const THEMES = [rainbow, batRacers, bluePup, webHero, nightHeroes, ocean]
 ```
 
 The theme appears as a chip on the home screen and is picked up by 🎲 Surprise.
+Like games, theme files must also be added to `ASSETS` in `sw.js` with a
+`CACHE` bump — CI enforces it.
 
 > **Keep themes original.** They may be *inspired by* the colours/mood of a show, but
 > must not reproduce its logos, characters, or artwork — the repo is public.
@@ -142,10 +156,11 @@ Serve locally (ES modules need http, not `file://`):
 python3 -m http.server 8000   # → http://localhost:8000
 ```
 
-Quick syntax sanity-check on a file:
+Run the same checks CI runs (plain node, no install):
 
 ```bash
-node --check src/games/dino/game.js
+node tools/smoke.mjs      # registries load, ids unique, palettes complete
+node tools/check-sw.mjs   # sw.js ASSETS complete + CACHE bumped (checks commits)
 ```
 
 Then click around: open the game, make sure sounds play, leave and re-open it (to

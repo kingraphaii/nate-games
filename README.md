@@ -23,14 +23,16 @@ server — and is hosted free on **GitHub Pages**.
   | 🙈 **Peekaboo!** | Open the curtains to reveal a hidden friend — cause & effect, for the youngest |
   | 🫧 **Bubble Pop** | Pop floating bubbles (with combos) — pure mouse-control practice |
   | 🎈 **Balloon Bash** | Burst balloons for points — aiming + the joy of a hot streak |
+  | 🍉 **Fruit Slice** | Wave the pointer to slice flying fruit — no clicking needed |
   | ✏️ **Trace Trails** | Follow a path with the pointer — fine mouse control |
   | 🔶 **Match It** | Find the matching colour & shape — shapes, colours, aiming |
   | 🔢 **Count With Me** | Tap and count 1–5 — counting + one-to-one correspondence |
   | 🔤 **Letter Sounds** | Find a letter, learn its phonics sound — alphabet + reading |
-  | 🎹 **Music Maker** | Tap buttons to play notes — cause-and-effect + music |
+  | 🎶 **Music Party** | Build a band, play a song, or throw a dance party — music + cause-and-effect |
 - **All sound is synthesized** (Web Audio) or spoken (browser speech synthesis), so there
   are **no audio files** to download or license.
-- Works offline-friendly, respects `prefers-reduced-motion`, and has a global **mute** button.
+- **Installs as an app (PWA)** and works fully offline — great for the car or a plane.
+- Respects `prefers-reduced-motion` and has a global **mute** button.
 
 ## How to run it locally
 
@@ -52,7 +54,10 @@ Then open **http://localhost:8000** in a browser.
 ```
 nate-games/
 ├── index.html              # single entry point
+├── manifest.webmanifest    # PWA manifest (install to home screen)
+├── sw.js                   # service worker: offline precache (bump CACHE to ship)
 ├── css/style.css           # global styles + theme variables + big-target UI
+├── assets/                 # app icons (private/ is gitignored personal art)
 ├── src/
 │   ├── core/               # the reusable engine
 │   │   ├── app.js          # app shell: home grid, navigation, theme switching
@@ -60,14 +65,20 @@ nate-games/
 │   │   ├── audio.js        # synthesized tones + speech (no audio files)
 │   │   ├── background.js   # animated themed home background (canvas)
 │   │   ├── confetti.js     # celebratory particle bursts
-│   │   └── juice.js        # shared "game feel": combos, multipliers, floating score
+│   │   ├── juice.js        # shared "game feel": combos, multipliers, floating score
+│   │   ├── round.js        # shared quiz-round scaffold (prompt, replay, next)
+│   │   ├── store.js        # safe localStorage wrapper (per-game settings)
+│   │   ├── activatable.js  # hover-dwell "rest to activate" helper
+│   │   └── edge-scroll.js  # mouse-position auto-scroll for the home grid
 │   ├── themes/             # one file per theme + index.js registry
 │   │   ├── index.js
 │   │   ├── rainbow.js  bat-racers.js  blue-pup.js  web-hero.js  night-heroes.js
 │   └── games/              # one folder per game + index.js registry
 │       ├── index.js
-│       ├── animals/  bubbles/  balloons/  trace/  match/  numbers/  letters/  soundboard/
-├── .github/workflows/deploy.yml   # auto-deploys to GitHub Pages on push
+│       ├── animals/  peekaboo/  bubbles/  balloons/  fruit/
+│       ├── trace/  match/  numbers/  letters/  music/
+├── tools/                  # dev-only CI checks (registry smoke test, sw precache)
+├── .github/workflows/      # GitHub Pages deploy + CI checks
 ├── CONTRIBUTING.md         # how to add new games and themes
 └── ROADMAP.md              # backlog of next-step ideas & improvements
 ```

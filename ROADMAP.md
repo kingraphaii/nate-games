@@ -12,11 +12,13 @@ Check items off as they ship, and add your own.
 
 ## ✅ Already built
 
-Games: Animal Friends · Bubble Pop · Balloon Bash · Trace Trails · Match It ·
-Count With Me · Letter Sounds · Music Maker.
+Games: Animal Friends · Peekaboo! · Bubble Pop · Balloon Bash · Fruit Slice ·
+Trace Trails · Match It · Count With Me · Letter Sounds · Music Party.
 Engine: theme system (5 presets + Surprise) · synthesized audio + speech ·
 animated background · confetti · combo/juice system · global mute ·
-`ctx.activatable` hover-dwell (rest-to-activate, in Letter Sounds).
+`ctx.activatable` hover-dwell (rest-to-activate) · PWA (installable, offline) ·
+per-game settings store (`ctx.settings`) · shared quiz-round scaffold
+(`core/round.js`) · CI (syntax, registry smoke test, sw precache check).
 
 ---
 
@@ -60,7 +62,7 @@ animated background · confetti · combo/juice system · global mute ·
 ## ♿ Accessibility & little-kid UX
 
 - [x] 🟡 **Hover-dwell (rest-to-activate).** Shared `ctx.activatable` helper: any target fires on a click *or* on the cursor resting ~0.9s, with a progress ring tracing its outline. ✅ shipped (`src/core/activatable.js`), first adopter Letter Sounds.
-- [ ] 🟢 **Roll dwell out to the other quiz games** — Animal Friends, Match It, Count With Me already use the same "choose a card" pattern; swap their click listeners for `ctx.activatable` (one line each).
+- [ ] 🟢 **Roll dwell out to the other quiz games** — Match It and Count With Me still use raw click listeners; swap them for `ctx.activatable` (Animal Friends and Letter Sounds already dwell).
 - [ ] 🟢 **Even bigger hit targets / spacing** option for the youngest hands.
 - [ ] 🟡 **Keyboard + switch support** — full play via Tab/Enter/Space and arrow keys (some of this exists via buttons).
 - [ ] 🟡 **High-contrast theme** for low vision.
@@ -76,7 +78,7 @@ animated background · confetti · combo/juice system · global mute ·
 
 ## 📦 Platform & infrastructure
 
-- [ ] 🟡 **PWA / offline** — add a manifest + service worker so it installs to the home screen and works without internet (great for car/plane). All assets are local already.
+- [x] 🟡 **PWA / offline** — manifest + service worker; installs to the home screen and works without internet. ✅ shipped (`manifest.webmanifest`, `sw.js`)
 - [ ] 🟢 **Open Graph / share image** — a nice preview card when the link is shared.
 - [ ] 🟡 **Performance pass** — cap devicePixelRatio, pause RAF when a game is idle, lighten the background on low-end devices.
 - [ ] 🟡 **Lighthouse / a11y CI** — add a check to the deploy workflow.
@@ -84,9 +86,9 @@ animated background · confetti · combo/juice system · global mute ·
 ## 🧩 Code & architecture (developer experience)
 
 - [ ] 🟢 **Per-game README/meta** — short notes in each game folder.
-- [ ] 🟡 **Shared difficulty + settings in `ctx`** — central place games read difficulty, volume, etc. (powers several tweaks above).
-- [ ] 🟡 **A round-based game helper** — Animal/Match/Count/Letters share a lot (prompt, "Say again", win → next). Factor a small `core/round.js` so new quiz-style games are even shorter. (Don't over-abstract — only if it stays simpler.)
-- [ ] 🟡 **A tiny test harness** — smoke-load each game module and assert it mounts/unmounts cleanly (catches registry/contract breaks).
+- [x] 🟡 **Shared settings in `ctx`** — per-game `ctx.settings.get/set` on a safe localStorage wrapper. ✅ shipped (`src/core/store.js`)
+- [x] 🟡 **A round-based game helper** — shared quiz shell + pick-one loop with managed timers. ✅ shipped (`src/core/round.js`, first adopter Animal Friends)
+- [x] 🟡 **A tiny test harness** — CI smoke-loads the game/theme registries and verifies the service-worker precache + cache-version bump. ✅ shipped (`tools/`, `.github/workflows/ci.yml`)
 - [ ] 🟢 **Asset pipeline note** — document where optional local images/sounds go.
 
 ## 🎨 Personalization (kept private)
