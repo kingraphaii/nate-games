@@ -45,6 +45,13 @@ export default {
     injectStyles();
     const shell = quizShell(root, { className: 'animals' });
 
+    // Optional recorded clips: assets/sounds/animals/<name>.mp3. Only clips in
+    // the manifest are fetched; any that are absent fall back to the spoken
+    // sound, so the game needs no files.
+    const soundUrl = (animal) =>
+      new URL(`assets/sounds/animals/${animal.name.toLowerCase()}.mp3`, document.baseURI).href;
+    ctx.audio.preloadSet?.('animals', ANIMALS.map((a) => a.name.toLowerCase()));
+
     pickOneRound(shell, ctx, {
       choices: () => ctx.shuffle(ANIMALS).slice(0, 3),
       cardClass: 'animal-card',
@@ -61,8 +68,14 @@ export default {
         ctx.confetti(hit.x, hit.y);
         btn.classList.add('wiggle');
         shell.setPrompt(`${animal.name}! ${animal.emoji}`);
-        ctx.speak(`${animal.name}! The ${animal.name} says ${animal.sound}!`);
-        return { delayMs: 1900 };
+        // Play the real recorded sound if we have it; otherwise speak the whole
+        // teaching sentence (the original behavior — unchanged with no files).
+        const played = ctx.audio.playSample?.(soundUrl(animal), {
+          fallback: () => ctx.speak(`${animal.name}! The ${animal.name} says ${animal.sound}!`),
+        });
+        // With a real clip, name the animal once it has played (managed timer).
+        if (played) shell.after(1100, () => ctx.speak(`${animal.name}!`));
+        return { delayMs: played ? 2400 : 1900 };
       },
     });
 
