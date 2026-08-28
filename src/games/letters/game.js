@@ -6,9 +6,14 @@
  * reveals the example picture, bursts confetti, and moves on. A wrong tap
  * gives a gentle shake and an "oops" — never punishing.
  *
- * Teaches: uppercase letter recognition, letter–sound correspondence (phonics),
- * and careful mouse aiming. Modeled on the Match It / Animal Friends reference.
+ * Two chip groups (persisted per device):
+ *   A–F / A–M / All  -> the letter pool, so a new learner starts small
+ *   ABC / abc        -> uppercase or lowercase glyphs (speech is the same)
+ *
+ * Teaches: letter recognition, letter–sound correspondence (phonics), and
+ * careful mouse aiming. Built on the core/round.js quiz scaffold.
  */
+import { quizShell, pickOneRound, modeChips } from '../../core/round.js';
 
 // Each letter carries its phonics "sound" (spelled how it sounds when spoken
 // aloud) and a friendly example word + emoji. Sounds use the common short/hard
@@ -42,6 +47,9 @@ const LETTERS = [
   { letter: 'Z', sound: 'zzz',  word: 'Zebra',   emoji: '🦓' },
 ];
 
+// How many letters each pool chip opens up (from the start of the alphabet).
+const POOLS = { af: 6, am: 13, all: 26 };
+
 // Bright card backgrounds, cycled so each choice is easy to tell apart.
 const CARD_COLORS = ['#ff6b6b', '#4dabf7', '#51cf66', '#fcc419', '#9775fa', '#ff922b'];
 
@@ -53,83 +61,63 @@ export default {
   tags: ['letters', 'phonics', 'reading'],
 
   mount(root, ctx) {
-    let target = null;   // the LETTERS entry to find this round
-    let busy = false;    // lock during the win animation
-    let timer = null;    // pending nextRound timer (cleared on cleanup)
-
-    root.innerHTML = `
-      <div class="letters">
-        <p class="big-prompt" id="le-prompt">Tap to start! 👆</p>
-        <div class="letters-reveal" id="le-reveal" aria-hidden="true"></div>
-        <button class="letters-replay" id="le-replay" title="Say it again">🔊 Say again</button>
-        <div class="letters-grid" id="le-grid"></div>
-      </div>`;
-
     injectStyles();
-    const promptEl = root.querySelector('#le-prompt');
-    const revealEl = root.querySelector('#le-reveal');
-    const gridEl = root.querySelector('#le-grid');
-    const replayEl = root.querySelector('#le-replay');
+    const shell = quizShell(root, { className: 'letters' });
 
-    function ask() {
-      promptEl.textContent = `Find the letter ${target.letter}!`;
-      ctx.speak(`Find the letter ${target.letter}!`);
+    const getPool = modeChips(shell, ctx, {
+      key: 'pool',
+      options: [
+        { id: 'af', label: 'A–F' },
+        { id: 'am', label: 'A–M' },
+        { id: 'all', label: 'All' },
+      ],
+      fallback: 'all',
+      onChange: () => loop.round(),
+    });
+    const getCase = modeChips(shell, ctx, {
+      key: 'case',
+      options: [
+        { id: 'upper', label: 'ABC' },
+        { id: 'lower', label: 'abc' },
+      ],
+      fallback: 'upper',
+      onChange: () => loop.round(),
+    });
+
+    // The glyph shown on cards and in the prompt; speech always says the name.
+    function glyph(entry) {
+      return getCase() === 'lower' ? entry.letter.toLowerCase() : entry.letter;
     }
 
-    function nextRound() {
-      busy = false;
-      revealEl.innerHTML = '';
-      revealEl.classList.remove('is-on');
-
-      const choices = ctx.shuffle(LETTERS).slice(0, 3);
-      target = ctx.pick(choices);
-
-      gridEl.innerHTML = '';
-      choices.forEach((entry, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'letter-card pop-in';
+    const loop = pickOneRound(shell, ctx, {
+      choices: () => ctx.shuffle(LETTERS.slice(0, POOLS[getPool()])).slice(0, 3),
+      cardClass: 'letter-card',
+      render: (entry, btn, i) => {
         btn.style.setProperty('--card', CARD_COLORS[i % CARD_COLORS.length]);
-        btn.textContent = entry.letter;
+        btn.textContent = glyph(entry);
         btn.setAttribute('aria-label', `Letter ${entry.letter}`);
-        // Fire on a click OR on resting the cursor here ~0.9s (toddler-friendly).
-        ctx.activatable(btn, (hit) => onPick(entry, btn, hit), { dwellMs: 900 });
-        gridEl.appendChild(btn);
-      });
-      ask();
-    }
-
-    function onPick(entry, btn, hit) {
-      if (busy) return;
-      if (entry.letter === target.letter) {
-        busy = true;
+      },
+      ask: (target) => {
+        shell.setPrompt(`Find the letter ${glyph(target)}!`);
+        ctx.speak(`Find the letter ${target.letter}!`);
+      },
+      onWin: (entry, btn, hit) => {
         ctx.audio.cheer();
         ctx.confetti(hit.x, hit.y);
         btn.classList.add('wiggle');
 
         // Reveal the phonics: letter, its sound, and an example word + picture.
-        promptEl.textContent = `${entry.letter} says “${entry.sound}” — ${entry.word}!`;
-        revealEl.innerHTML = `<span class="reveal-emoji">${entry.emoji}</span>
+        shell.setPrompt(`${glyph(entry)} says “${entry.sound}” — ${entry.word}!`);
+        shell.revealEl.innerHTML = `<span class="reveal-emoji">${entry.emoji}</span>
           <span class="reveal-word">${entry.word}</span>`;
-        revealEl.classList.add('is-on');
+        shell.revealEl.classList.add('is-on');
         // Phonics cadence: name, then sound twice, then the example word.
         ctx.speak(`${entry.letter}. ${entry.sound}, ${entry.sound}, ${entry.word}!`);
+        return { delayMs: 2600 };
+      },
+    });
 
-        timer = setTimeout(nextRound, 2600);
-      } else {
-        ctx.audio.oops();
-        btn.classList.remove('shake');
-        void btn.offsetWidth; // restart the shake animation
-        btn.classList.add('shake');
-      }
-    }
-
-    replayEl.addEventListener('click', () => { if (target) ask(); });
-
-    // Wait for the first tap so speech is allowed to play (autoplay rules).
-    root.querySelector('.letters').addEventListener('click', () => nextRound(), { once: true });
-
-    // Cleanup: cancel any pending round timer.
-    return () => { if (timer) clearTimeout(timer); };
+    return shell.dispose;
   },
 };
 
@@ -138,18 +126,10 @@ function injectStyles() {
   const css = document.createElement('style');
   css.id = 'letters-styles';
   css.textContent = `
-    .letters { height:100%; display:flex; flex-direction:column; align-items:center;
-      justify-content:center; gap:12px; padding:16px; }
-    .letters-reveal { display:flex; align-items:center; gap:12px; min-height:60px;
-      opacity:0; transform:scale(0.6); transition:opacity .25s ease, transform .25s ease; }
-    .letters-reveal.is-on { opacity:1; transform:scale(1); }
+    .letters .round-reveal { min-height:60px; }
     .reveal-emoji { font-size:clamp(2.6rem,7vw,3.6rem); line-height:1; }
     .reveal-word { font-family:var(--font); font-weight:800; color:var(--text);
       font-size:clamp(1.4rem,4vw,2rem); }
-    .letters-replay { padding:10px 20px; border:none; border-radius:999px; background:var(--accent);
-      font-family:var(--font); font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:var(--shadow); }
-    .letters-replay:hover { transform:scale(1.05); } .letters-replay:active { transform:scale(0.95); }
-    .letters-grid { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
     .letter-card { width:clamp(110px,20vw,170px); height:clamp(110px,20vw,170px); border:none;
       border-radius:30px; background:var(--card, var(--primary)); color:#fff; cursor:pointer;
       box-shadow:var(--shadow); font-family:var(--font); font-weight:800;
