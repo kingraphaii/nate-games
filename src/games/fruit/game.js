@@ -159,7 +159,10 @@ export default {
       const { mult, streak, leveledUp } = combo.hit(performance.now());
       let gained = mult;
       if (f.special) gained += SPECIAL_BONUS;
+      const before = sliced;
       sliced += gained;
+      // Every 10th point is a sticker milestone.
+      if (Math.floor(sliced / 10) > Math.floor(before / 10)) ctx.award?.();
 
       ctx.audio.swoosh({ pitch: 1.4 - (f.size - MIN_SIZE) / (MAX_SIZE - MIN_SIZE) * 0.5 });
       // Juice splatter — confetti at the fruit, in its color.

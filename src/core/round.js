@@ -198,6 +198,7 @@ export function pickOneRound(shell, ctx, spec) {
     if (entry === target) {
       busy = true;
       const win = spec.onWin(entry, btn, hit) || {};
+      ctx.award?.(); // a quiz win is a sticker milestone
       shell.after(win.delayMs ?? 1900, round);
     } else {
       ctx.audio.oops();

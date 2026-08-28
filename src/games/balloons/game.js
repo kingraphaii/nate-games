@@ -132,7 +132,10 @@ export default {
       const { mult, streak, leveledUp } = combo.hit(performance.now());
       let gained = mult;
       if (b.golden) gained += GOLDEN_BONUS; // bonus on top of the multiplier
+      const before = popped;
       popped += gained;
+      // Every 10th point is a sticker milestone.
+      if (Math.floor(popped / 10) > Math.floor(before / 10)) ctx.award?.();
 
       ctx.audio.burst({ pitch, volume: b.golden ? 0.6 : 0.5 });
       ctx.confetti(e.clientX, e.clientY, {

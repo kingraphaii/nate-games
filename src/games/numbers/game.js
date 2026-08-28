@@ -121,6 +121,7 @@ export default {
       tallyEl.classList.add('is-done');
       shell.setPrompt(`${total} ${what}! ${item.emoji}🎉`);
       ctx.confetti(hit.x, hit.y);
+      ctx.award?.();
 
       // Let the last count number land, then name the total and celebrate.
       shell.after(550, () => {
