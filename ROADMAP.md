@@ -47,10 +47,10 @@ per-game settings store (`ctx.settings`) · shared quiz-round scaffold
 
 ## 🎨 Themes & visuals
 
-- [ ] 🟢 **More theme presets** — Ocean, Space, Dino, Farm, Princess, Construction. One file each (see CONTRIBUTING).
-- [ ] 🟢 **Per-theme cursor** — themed pointer art to match the background.
-- [ ] 🟡 **Theme-aware game art** — let games pull accent colors/glyphs from the active theme more deeply.
-- [ ] 🟡 **Reduced-motion polish** — audit every animation under `prefers-reduced-motion` (background already respects it).
+- [x] 🟢 **More theme presets** — Ocean, Space, Dino, Farm shipped (Princess, Construction still open). ✅
+- [x] 🟢 **Per-theme cursor** — the pointer outline is tinted to the active theme. ✅
+- [x] 🟡 **Theme-aware game art** — cards read a themed `--card-bg` from the palette. ✅
+- [x] 🟡 **Reduced-motion polish** — confetti thins out; DOM animations are neutralized by a global override. ✅
 
 ## 🔊 Audio
 

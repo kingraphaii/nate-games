@@ -1,38 +1,37 @@
-# Upgrade pass — Stage 5: Recorded sound packs (`feat/recorded-sounds`, issue #9)
+# Upgrade pass — Stage 6: Visual overhaul + docs sync (`feat/visual-overhaul`, issue #11)
 
 Six-stage pass: 1 Foundations ✅ · 2 Deeper quiz games ✅ · 3 Sticker book ✅ ·
-4 Audio controls ✅ · 5 Recorded sound packs · 6 Visual overhaul + docs sync.
-This file tracks the active stage only.
+4 Audio controls ✅ · 5 Recorded sound packs ✅ · 6 Visual overhaul (final).
+This is the last stage.
 
 ## Checklist
 
-- [x] `audio.js` — `preload`/`playSample` (decode cache, play through master, synth fallback)
-- [x] `audio.js` — `soundManifest`/`preloadSet` (only fetch clips that exist → no 404 noise)
-- [x] `assets/sounds/` — manifest.json, CREDITS.md, README.md, animals/ + phonics/ (.gitkeep)
-- [x] Animals win plays real sound (fallback: spoken sentence); Letters plays phonics clip (fallback: spoken phonics)
-- [x] `check-sw.mjs` — sound files need a CREDITS line; manifest must match disk (both directions)
-- [x] `sw.js` — precache manifest.json, CACHE → `little-games-v6`; ROADMAP check-offs
-- [x] Verify: empty manifest → 0 mp3 fetches; playSample plays a cached buffer; fallback speaks; CI gates fire
-- [ ] PR referencing #9
-
-## Owner follow-up (Percy adds files incrementally)
-
-- Animals: CC0 clips from freesound.org (CC0 filter) or Wikimedia PD/CC0.
-- Phonics: record ~26 clips (say *buh*, not *bee*), convert to mono MP3.
-- Each new file: add to `animals/` or `phonics/`, add its base name to
-  `manifest.json`, add a `CREDITS.md` line, add to `sw.js` ASSETS + bump CACHE.
-  CI enforces all four.
+- [x] New themes: ocean, space, dino, farm (registered)
+- [x] Per-theme cursor — generated from palette.primary, `--cursor` + CSS fallback
+- [x] Theme-aware cards — `--card-bg` slot; animals/match/numbers use it
+- [x] Reduced-motion — confetti thins to ~40% + shorter life; DOM anims already neutralized
+- [x] Fix: dark-theme mode chips were white-on-white; now `var(--surface)` (also fixes Stage 2 dark themes)
+- [x] `sw.js` — 4 theme files in ASSETS, CACHE → `little-games-v7`
+- [x] Docs: README (themes, audio, controls, tree), ROADMAP check-offs, CONTRIBUTING card slot
+- [x] Verify: 9 theme chips; card-bg + cursor per theme; contrast on light + dark; confetti reduction
+- [ ] PR referencing #11
 
 ## Review
 
-- The manifest was added mid-stage to fix real console noise: without it, every
-  Animals/Letters visit fetched all candidate clips and logged ~46 console 404s.
-  The manifest gates preloading to files that exist; empty → zero mp3 fetches.
-  `check-sw` validates it matches disk both ways, so it cannot drift.
-- One test-harness gotcha found: the CREDITS check used a bare substring match,
-  so the format example (`animals/cow.mp3`) masked a real missing credit. Fixed
-  to match the backticked token and changed the example to `<name>.mp3`.
-- Browser proof: `preloadSet` with the empty manifest made 0 mp3 fetches (only
-  manifest.json, 200); `playSample` played an injected buffer (returned true)
-  and ran the fallback for a missing url; Animals and Letters wins spoke via
-  fallback; the reveal showed. CI gate branches all verified.
+- Found and fixed a real contrast bug uncovered by the two new dark themes: the
+  Stage-2 mode chips hard-coded a white background with `var(--text)`, so on any
+  dark theme (Space, Bat Racers, Night Heroes) an inactive chip was near-white
+  text on white — invisible. Now they use `var(--surface)` like the home chips.
+- Cursor is generated from the palette (white body + themed outline), so it
+  themes for free with no per-theme data and the shape/hotspot never change.
+- Existing themes keep the `#fff` card fallback (no churn); only the new light
+  themes tint their cards.
+- Browser proof: all 9 theme chips present and applied; `--card-bg`/`--cursor`
+  set per theme (Farm outline #e0533d, Space #ffd400); Match It readable on Farm
+  (cream cards) and Space (dark surface, legible chips after the fix); confetti
+  28→11 particles with life 0.7 under reduced motion.
+
+## Pass complete after merge
+
+All six stages shipped. Recorded audio files remain an incremental owner task
+(see assets/sounds/README.md).
