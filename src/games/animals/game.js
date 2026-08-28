@@ -1,13 +1,15 @@
 /**
  * Animal Friends — listen-and-find game.
  *
- * The narrator asks "Where is the cow?" and the child clicks the matching animal.
+ * The narrator asks "Where is the cow?" and the child picks the matching animal.
  * Correct → the animal says its name + sound, confetti, next round.
  * Wrong → a gentle wiggle and "try again" (never punishing).
  *
  * Teaches: animal vocabulary, listening, and careful mouse aiming.
- * This file is the REFERENCE game — copy its shape to make new ones.
+ * This file is the REFERENCE game — it shows the core/round.js quiz scaffold
+ * (shell + pick-one loop); copy its shape to make new quiz games.
  */
+import { quizShell, pickOneRound } from '../../core/round.js';
 
 const ANIMALS = [
   { name: 'Cow', emoji: '🐮', sound: 'Moo' },
@@ -32,67 +34,31 @@ export default {
   tags: ['sounds', 'words', 'listening'],
 
   mount(root, ctx) {
-    let target = null;
-    let busy = false;
-
-    root.innerHTML = `
-      <div class="animals">
-        <p class="big-prompt" id="an-prompt">Tap to start! 👆</p>
-        <button class="animals-replay" id="an-replay" title="Say it again">🔊 Say again</button>
-        <div class="animals-grid" id="an-grid"></div>
-      </div>`;
-
     injectStyles();
-    const promptEl = root.querySelector('#an-prompt');
-    const gridEl = root.querySelector('#an-grid');
-    const replayEl = root.querySelector('#an-replay');
+    const shell = quizShell(root, { className: 'animals' });
 
-    function ask() {
-      ctx.speak(`Where is the ${target.name}?`);
-      promptEl.textContent = `Find the ${target.name}! ${target.emoji}`;
-    }
-
-    function nextRound() {
-      busy = false;
-      const choices = ctx.shuffle(ANIMALS).slice(0, 3);
-      target = ctx.pick(choices);
-      gridEl.innerHTML = '';
-      for (const animal of choices) {
-        const btn = document.createElement('button');
-        btn.className = 'animal-card pop-in';
+    pickOneRound(shell, ctx, {
+      choices: () => ctx.shuffle(ANIMALS).slice(0, 3),
+      cardClass: 'animal-card',
+      render: (animal, btn) => {
         btn.innerHTML = `<span class="animal-emoji">${animal.emoji}</span>`;
         btn.setAttribute('aria-label', animal.name);
-        btn.addEventListener('click', (e) => onPick(animal, btn, e));
-        gridEl.appendChild(btn);
-      }
-      ask();
-    }
-
-    function onPick(animal, btn, e) {
-      if (busy) return;
-      if (animal.name === target.name) {
-        busy = true;
+      },
+      ask: (target) => {
+        shell.setPrompt(`Find the ${target.name}! ${target.emoji}`);
+        ctx.speak(`Where is the ${target.name}?`);
+      },
+      onWin: (animal, btn, hit) => {
         ctx.audio.cheer();
-        ctx.confetti(e.clientX, e.clientY);
+        ctx.confetti(hit.x, hit.y);
         btn.classList.add('wiggle');
-        promptEl.textContent = `${animal.name}! ${animal.emoji}`;
+        shell.setPrompt(`${animal.name}! ${animal.emoji}`);
         ctx.speak(`${animal.name}! The ${animal.name} says ${animal.sound}!`);
-        setTimeout(nextRound, 1900);
-      } else {
-        ctx.audio.oops();
-        btn.classList.remove('shake');
-        void btn.offsetWidth; // restart animation
-        btn.classList.add('shake');
-      }
-    }
+        return { delayMs: 1900 };
+      },
+    });
 
-    replayEl.addEventListener('click', () => { if (target) ask(); });
-
-    // Wait for the first tap so speech is allowed to play.
-    const start = () => { nextRound(); };
-    promptEl.closest('.animals').addEventListener('click', start, { once: true });
-
-    return () => {}; // nothing global to clean up
+    return shell.dispose;
   },
 };
 
@@ -101,11 +67,6 @@ function injectStyles() {
   const css = document.createElement('style');
   css.id = 'animals-styles';
   css.textContent = `
-    .animals { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:16px; }
-    .animals-replay { padding:10px 20px; border:none; border-radius:999px; background:var(--accent);
-      font-family:var(--font); font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:var(--shadow); }
-    .animals-replay:hover { transform:scale(1.05); } .animals-replay:active { transform:scale(0.95); }
-    .animals-grid { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
     .animal-card { width:clamp(120px,22vw,200px); height:clamp(120px,22vw,200px); border:none;
       border-radius:32px; background:#fff; box-shadow:var(--shadow); cursor:pointer; display:flex;
       align-items:center; justify-content:center; transition:transform .12s ease; }
