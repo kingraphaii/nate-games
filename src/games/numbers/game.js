@@ -8,9 +8,13 @@
  * and the written digit all line up. Finish the set → cheer, confetti, and the
  * total is named ("Three ducks!"). Then a fresh round.
  *
- * Teaches: counting 1–5, one-to-one correspondence, numeral recognition, and
- * careful clicking. Modeled on the Animal Friends reference game.
+ * A 1–5 / 1–10 chip picks the counting range (persisted per device).
+ *
+ * Teaches: counting, one-to-one correspondence, numeral recognition, and
+ * careful clicking. Uses the core/round.js shell for the frame and timers;
+ * the tap-all count loop is its own (it is not a pick-one game).
  */
+import { quizShell, modeChips } from '../../core/round.js';
 
 // Objects to count. Each has a singular + plural name (for natural speech)
 // and a big, cheerful emoji.
@@ -28,12 +32,10 @@ const ITEMS = [
 ];
 
 // Spoken number words, indexed by the number itself (NUMBER_WORDS[3] === 'three').
-const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five'];
+const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 
 // An ascending note per count, so the tally climbs in pitch as you go.
-const COUNT_NOTES = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4'];
-
-const MAX_COUNT = 5; // toddler-friendly range: counts of 1–5
+const COUNT_NOTES = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5'];
 
 export default {
   id: 'numbers',
@@ -43,43 +45,45 @@ export default {
   tags: ['numbers', 'counting'],
 
   mount(root, ctx) {
+    injectStyles();
+    const shell = quizShell(root, { className: 'numbers' });
+
+    // The big tally numeral sits above the prompt.
+    const tallyEl = document.createElement('span');
+    tallyEl.className = 'numbers-tally';
+    tallyEl.textContent = '0';
+    shell.promptEl.before(tallyEl);
+
+    const getMax = modeChips(shell, ctx, {
+      key: 'max',
+      options: [
+        { id: 5, label: '1–5' },
+        { id: 10, label: '1–10' },
+      ],
+      fallback: 5,
+      onChange: () => round(),
+    });
+
     let item = null;     // the object kind for this round
     let total = 0;       // how many to count this round
     let counted = 0;     // how many have been tapped so far
     let busy = false;    // lock during the win celebration
-    let timer = null;    // pending nextRound timer (cleared on cleanup)
-
-    root.innerHTML = `
-      <div class="numbers">
-        <div class="numbers-top">
-          <span class="numbers-tally" id="nu-tally">0</span>
-          <p class="big-prompt numbers-prompt" id="nu-prompt">Tap to start! 👆</p>
-        </div>
-        <button class="numbers-replay" id="nu-replay" title="Say it again">🔊 Say again</button>
-        <div class="numbers-grid" id="nu-grid"></div>
-      </div>`;
-
-    injectStyles();
-    const promptEl = root.querySelector('#nu-prompt');
-    const tallyEl = root.querySelector('#nu-tally');
-    const gridEl = root.querySelector('#nu-grid');
-    const replayEl = root.querySelector('#nu-replay');
 
     function ask() {
       const what = total === 1 ? item.one : item.many;
-      promptEl.textContent = `Tap and count the ${what}! ${item.emoji}`;
+      shell.setPrompt(`Tap and count the ${what}! ${item.emoji}`);
       ctx.speak(`Tap and count the ${what}!`);
     }
 
-    function nextRound() {
+    function round() {
       busy = false;
       counted = 0;
-      total = 1 + Math.floor(Math.random() * MAX_COUNT); // 1..MAX_COUNT
+      total = 1 + Math.floor(Math.random() * getMax());
       item = ctx.pick(ITEMS);
 
       tallyEl.textContent = '0';
       tallyEl.classList.remove('is-done');
-      gridEl.innerHTML = '';
+      shell.gridEl.innerHTML = '';
       for (let i = 0; i < total; i++) {
         const btn = document.createElement('button');
         btn.className = 'count-item pop-in';
@@ -87,13 +91,13 @@ export default {
         btn.innerHTML = `
           <span class="count-emoji">${item.emoji}</span>
           <span class="count-badge" aria-hidden="true"></span>`;
-        btn.addEventListener('click', (e) => onTap(btn, e));
-        gridEl.appendChild(btn);
+        ctx.activatable(btn, (hit) => onTap(btn, hit), { dwellMs: 900 });
+        shell.gridEl.appendChild(btn);
       }
       ask();
     }
 
-    function onTap(btn, e) {
+    function onTap(btn, hit) {
       if (busy || btn.classList.contains('is-counted')) return;
 
       counted += 1;
@@ -108,31 +112,33 @@ export default {
       ctx.audio.note(COUNT_NOTES[counted] || 'C5', { duration: 0.35, type: 'triangle' });
       ctx.speak(NUMBER_WORDS[counted] || String(counted));
 
-      if (counted === total) finish(e);
+      if (counted === total) finish(hit);
     }
 
-    function finish(e) {
+    function finish(hit) {
       busy = true;
       const what = total === 1 ? item.one : item.many;
       tallyEl.classList.add('is-done');
-      promptEl.textContent = `${total} ${what}! ${item.emoji}🎉`;
-      ctx.confetti(e.clientX, e.clientY);
+      shell.setPrompt(`${total} ${what}! ${item.emoji}🎉`);
+      ctx.confetti(hit.x, hit.y);
 
       // Let the last count number land, then name the total and celebrate.
-      timer = setTimeout(() => {
+      shell.after(550, () => {
         ctx.audio.cheer();
         ctx.speak(`${NUMBER_WORDS[total] || total} ${what}! Great counting!`);
-        timer = setTimeout(nextRound, 2200);
-      }, 550);
+        shell.after(2200, round);
+      });
     }
 
-    replayEl.addEventListener('click', () => { if (item) ask(); });
+    shell.onStart(round);
+    shell.onReplay(ask);
+    shell.onNext(() => {
+      if (!item) return;
+      shell.clearTimers();
+      round();
+    });
 
-    // Wait for the first tap so speech is allowed to play (autoplay rules).
-    root.querySelector('.numbers').addEventListener('click', () => nextRound(), { once: true });
-
-    // Cleanup: cancel any pending timers.
-    return () => { if (timer) clearTimeout(timer); };
+    return shell.dispose;
   },
 };
 
@@ -141,9 +147,6 @@ function injectStyles() {
   const css = document.createElement('style');
   css.id = 'numbers-styles';
   css.textContent = `
-    .numbers { height:100%; display:flex; flex-direction:column; align-items:center;
-      justify-content:center; gap:12px; padding:16px; }
-    .numbers-top { display:flex; flex-direction:column; align-items:center; gap:4px; }
     .numbers-tally { font-family:var(--font); font-weight:800; line-height:1;
       font-size:clamp(3.4rem, 12vw, 6rem); color:var(--primary);
       text-shadow:0 4px 0 rgba(0,0,0,0.12); }
@@ -151,12 +154,7 @@ function injectStyles() {
     .numbers-tally.is-done { color:var(--accent); animation:nuPop .5s ease; }
     @keyframes nuBump { 0%,100%{transform:scale(1)} 45%{transform:scale(1.28)} }
     @keyframes nuPop { 0%{transform:scale(0.6)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
-    .numbers-prompt { margin:0; }
-    .numbers-replay { padding:10px 20px; border:none; border-radius:999px; background:var(--accent);
-      font-family:var(--font); font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:var(--shadow); }
-    .numbers-replay:hover { transform:scale(1.05); } .numbers-replay:active { transform:scale(0.95); }
-    .numbers-grid { display:flex; flex-wrap:wrap; gap:18px; justify-content:center; align-items:center;
-      max-width:760px; }
+    .numbers .round-grid { gap:18px; align-items:center; max-width:760px; }
     .count-item { position:relative; width:clamp(96px,18vw,150px); height:clamp(96px,18vw,150px);
       border:none; border-radius:28px; background:#fff; box-shadow:var(--shadow); cursor:pointer;
       display:flex; align-items:center; justify-content:center; transition:transform .12s ease, opacity .2s ease; }
