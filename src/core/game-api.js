@@ -39,6 +39,9 @@
  *   ctx.settings.get(key, fallback) / ctx.settings.set(key, value) -> per-game
  *       persistent settings (difficulty, mode). Stored per game id, JSON-safe
  *       values only. Best-effort: falls back to in-memory in private browsing.
+ *   ctx.award() -> register one milestone for the sticker book (a win, every
+ *       10th pop, a finished shape). Call it at the game's happy moments; the
+ *       pacing and the unlock celebration live in core/stickers.js.
  *
  * Round-based quiz games should build on core/round.js (quizShell +
  * pickOneRound) instead of hand-rolling the prompt/replay/advance frame —

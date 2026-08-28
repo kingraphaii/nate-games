@@ -9,6 +9,7 @@
  *
  * Order in this array = order on the home screen.
  */
+import stickers from './stickers/game.js';
 import animals from './animals/game.js';
 import peekaboo from './peekaboo/game.js';
 import bubbles from './bubbles/game.js';
@@ -22,7 +23,7 @@ import music from './music/game.js';
 
 import { assertValidGame } from '../core/game-api.js';
 
-export const GAMES = [animals, peekaboo, bubbles, balloons, fruit, trace, match, numbers, letters, music].map(assertValidGame);
+export const GAMES = [stickers, animals, peekaboo, bubbles, balloons, fruit, trace, match, numbers, letters, music].map(assertValidGame);
 
 export function getGame(id) {
   return GAMES.find((g) => g.id === id) || null;
