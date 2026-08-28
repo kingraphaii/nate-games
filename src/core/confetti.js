@@ -9,6 +9,11 @@ export class Confetti {
     this.particles = [];
     this.raf = null;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Reduced motion: fewer, shorter-lived particles (a gentle sprinkle, not a
+    // burst). Canvas RAF is out of reach of the global CSS motion override.
+    this.reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
+    window.matchMedia?.('(prefers-reduced-motion: reduce)')
+      .addEventListener?.('change', (e) => { this.reduceMotion = e.matches; });
     this._loop = this._loop.bind(this);
     this._resize = this._resize.bind(this);
     window.addEventListener('resize', this._resize);
@@ -24,8 +29,10 @@ export class Confetti {
 
   /** Burst `count` particles outward from screen point (x, y). */
   burst(x, y, { count = 28, colors = ['#ff7a59', '#ffd166', '#06d6a0', '#118ab2', '#ef476f'] } = {}) {
-    for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+    // Reduced motion: ~40% of the particles, a shorter life, calmer spin.
+    const n = this.reduceMotion ? Math.max(4, Math.round(count * 0.4)) : count;
+    for (let i = 0; i < n; i++) {
+      const angle = (Math.PI * 2 * i) / n + Math.random() * 0.5;
       const speed = 120 + Math.random() * 220;
       this.particles.push({
         x, y,
@@ -33,9 +40,9 @@ export class Confetti {
         vy: Math.sin(angle) * speed - 120,
         size: 6 + Math.random() * 8,
         color: colors[Math.floor(Math.random() * colors.length)],
-        life: 1,
+        life: this.reduceMotion ? 0.7 : 1,
         rot: Math.random() * Math.PI,
-        spin: (Math.random() - 0.5) * 12,
+        spin: (this.reduceMotion ? 0.3 : 1) * (Math.random() - 0.5) * 12,
       });
     }
     this._start();

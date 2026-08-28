@@ -241,8 +241,10 @@ function injectShellStyles() {
     .round-grid { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
     .round-chips { display:flex; flex-wrap:wrap; gap:18px; justify-content:center; }
     .chip-group { display:flex; gap:8px; }
+    /* Surface + text (not hard white) so an inactive chip stays readable on
+       dark themes, matching the home theme chips. */
     .round-chip { min-height:44px; padding:8px 18px; border:none; border-radius:999px;
-      background:#fff; opacity:0.75; font-family:var(--font); font-size:1rem; font-weight:800;
+      background:var(--surface); opacity:0.8; font-family:var(--font); font-size:1rem; font-weight:800;
       color:var(--text); cursor:pointer; box-shadow:var(--shadow); transition:transform .12s ease; }
     .round-chip.is-active { background:var(--primary); color:#fff; opacity:1; }
     @media (hover: hover) { .round-chip:hover { transform:scale(1.06); } }
