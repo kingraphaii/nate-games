@@ -12,7 +12,7 @@
  * Paths are relative to this script's location, so the same worker works locally
  * and under the `/nate-games/` GitHub Pages base path. Bump CACHE to ship updates.
  */
-const CACHE = 'little-games-v1';
+const CACHE = 'little-games-v2';
 
 const ASSETS = [
   './',
@@ -32,6 +32,8 @@ const ASSETS = [
   'src/core/activatable.js',
   'src/core/game-api.js',
   'src/core/juice.js',
+  'src/core/round.js',
+  'src/core/store.js',
   // Themes
   'src/themes/index.js',
   'src/themes/bat-racers.js',

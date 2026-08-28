@@ -18,6 +18,7 @@ import { Confetti } from './confetti.js';
 import { EdgeScroller } from './edge-scroll.js';
 import { makeActivatable } from './activatable.js';
 import { shuffle, pick } from './game-api.js';
+import { load, save } from './store.js';
 
 const STORAGE_KEY = 'nate-games:theme';
 const SCROLL_KEY = 'nate-games:autoscroll';
@@ -191,6 +192,10 @@ class App {
       activatable: (el, onActivate, opts) => makeActivatable(el, onActivate, opts),
       shuffle,
       pick,
+      settings: {
+        get: (key, fallback) => load(`g:${game.id}:${key}`, fallback),
+        set: (key, value) => save(`g:${game.id}:${key}`, value),
+      },
     };
     const cleanup = game.mount(this.playArea, ctx);
     this._cleanup = typeof cleanup === 'function' ? cleanup : null;

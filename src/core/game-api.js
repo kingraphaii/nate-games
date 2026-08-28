@@ -36,6 +36,13 @@
  *       click listener for any "choose this" target. See core/activatable.js.
  *   ctx.shuffle(array)       -> returns a new shuffled copy (handy helper)
  *   ctx.pick(array)          -> returns a random element
+ *   ctx.settings.get(key, fallback) / ctx.settings.set(key, value) -> per-game
+ *       persistent settings (difficulty, mode). Stored per game id, JSON-safe
+ *       values only. Best-effort: falls back to in-memory in private browsing.
+ *
+ * Round-based quiz games should build on core/round.js (quizShell +
+ * pickOneRound) instead of hand-rolling the prompt/replay/advance frame —
+ * see src/games/animals/game.js for the reference shape.
  *
  * Keep games:
  *   - Mouse-friendly: large hit targets, obvious hover/active states.
